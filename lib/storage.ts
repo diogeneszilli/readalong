@@ -19,7 +19,10 @@ export interface PageRecord {
   pageNumber: number;
   level: Level;
   page: StoryPage;
+  /** First cold read — used for level placement. */
   read?: ReadRecord;
+  /** Optional repeated readings of the same page (fluency practice). */
+  rereads?: ReadRecord[];
   questionCorrect?: boolean;
   choiceTaken?: string;
 }

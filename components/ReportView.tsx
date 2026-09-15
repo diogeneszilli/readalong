@@ -41,6 +41,7 @@ export default function ReportView({ sessionId }: { sessionId: string }) {
   const norm = LEVELS[session.startLevel].wcpmNorm;
   const answered = session.pages.filter((p) => p.questionCorrect !== undefined);
   const questionsRight = answered.filter((p) => p.questionCorrect).length;
+  const rereadCount = session.pages.reduce((n, p) => n + (p.rereads?.length ?? 0), 0);
   const practiceWords = Array.from(new Set(readPages.flatMap((p) => p.read!.missedWords)));
   const levelPath = session.pages.map((p) => p.level);
   const totalWords = readPages.reduce((n, p) => n + p.read!.total, 0);
@@ -75,7 +76,11 @@ export default function ReportView({ sessionId }: { sessionId: string }) {
         <Stat label="Words read aloud" value={String(totalWords)} sub={`${totalMinutes.toFixed(1)} min`} />
         <Stat label="Accuracy" value={`${Math.round(avgAccuracy * 100)}%`} sub={placement(avgAccuracy)} />
         <Stat label="Fluency" value={`${avgWcpm}`} sub={`WCPM · grade norm ${norm}`} />
-        <Stat label="Comprehension" value={`${questionsRight}/${answered.length}`} sub="questions right" />
+        <Stat
+          label="Comprehension"
+          value={`${questionsRight}/${answered.length}`}
+          sub={rereadCount > 0 ? `questions right · ${rereadCount} re-read${rereadCount > 1 ? "s" : ""}` : "questions right"}
+        />
       </section>
 
       <section className="rounded-3xl bg-white p-6 shadow">
@@ -153,7 +158,14 @@ export default function ReportView({ sessionId }: { sessionId: string }) {
                     "—"
                   )}
                 </td>
-                <td>{p.read?.wcpm ?? "—"}</td>
+                <td>
+                  {p.read?.wcpm ?? "—"}
+                  {p.rereads?.length ? (
+                    <span className="ml-1 text-emerald-700" title="after re-reading">
+                      → {p.rereads.at(-1)!.wcpm}
+                    </span>
+                  ) : null}
+                </td>
                 <td>{p.questionCorrect === undefined ? "—" : p.questionCorrect ? "✅" : "❌"}</td>
                 <td className="text-slate-500">{p.choiceTaken ?? (p.page.isEnding ? "The End" : "—")}</td>
               </tr>

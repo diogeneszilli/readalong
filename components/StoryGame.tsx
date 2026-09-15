@@ -27,6 +27,7 @@ export default function StoryGame({ sessionId }: { sessionId: string }) {
   const [phase, setPhase] = useState<Phase>("loading");
   const [error, setError] = useState<string | null>(null);
   const [loadingLine, setLoadingLine] = useState(0);
+  const [attempt, setAttempt] = useState(0);
   const fetching = useRef(false);
 
   const current: PageRecord | undefined = session?.pages[session.pages.length - 1];
@@ -70,6 +71,7 @@ export default function StoryGame({ sessionId }: { sessionId: string }) {
         update(s, (d) => {
           d.pages.push({ pageNumber: d.pages.length + 1, level: d.level, page: data.page! });
         });
+        setAttempt(0);
         setPhase("reading");
       } catch (e) {
         setError(e instanceof Error ? e.message : "Something went wrong");
@@ -119,15 +121,18 @@ export default function StoryGame({ sessionId }: { sessionId: string }) {
   const onReadDone = useCallback(
     (o: ReadAloudOutcome) => {
       if (!session || !current) return;
+      const record = {
+        accuracy: o.alignment.accuracy,
+        wcpm: o.wcpm,
+        correct: o.alignment.correct,
+        total: o.alignment.total,
+        missedWords: o.alignment.missedWords,
+        elapsedMs: o.elapsedMs,
+      };
       update(session, (d) => {
-        d.pages[d.pages.length - 1].read = {
-          accuracy: o.alignment.accuracy,
-          wcpm: o.wcpm,
-          correct: o.alignment.correct,
-          total: o.alignment.total,
-          missedWords: o.alignment.missedWords,
-          elapsedMs: o.elapsedMs,
-        };
+        const page = d.pages[d.pages.length - 1];
+        if (page.read) (page.rereads ??= []).push(record);
+        else page.read = record;
       });
       setPhase("result");
     },
@@ -215,7 +220,12 @@ export default function StoryGame({ sessionId }: { sessionId: string }) {
               🔊 Read it to me first
             </button>
           </p>
-          <ReadAloud key={current.pageNumber} text={current.page.text} onDone={onReadDone} />
+          {attempt > 0 && (
+            <p className="rounded-xl bg-indigo-50 px-4 py-2 font-bold text-indigo-800">
+              🔁 Reading it again — see if you can beat {current.read?.wcpm ?? 0} words per minute!
+            </p>
+          )}
+          <ReadAloud key={`${current.pageNumber}-${attempt}`} text={current.page.text} onDone={onReadDone} />
         </div>
       )}
 
@@ -224,7 +234,15 @@ export default function StoryGame({ sessionId }: { sessionId: string }) {
       )}
 
       {current?.read && phase === "result" && (
-        <ResultCard read={current.read} onNext={() => setPhase("question")} />
+        <ResultCard
+          read={current.rereads?.at(-1) ?? current.read}
+          firstRead={current.rereads?.length ? current.read : undefined}
+          onNext={() => setPhase("question")}
+          onReadAgain={() => {
+            setAttempt((a) => a + 1);
+            setPhase("reading");
+          }}
+        />
       )}
 
       {current && phase === "question" && (

@@ -10,9 +10,21 @@ const MESSAGES = {
   frustration: { emoji: "💪", title: "Nice try, that was a tough one!", sub: "The next page will be a bit easier so you can shine." },
 };
 
-export default function ResultCard({ read, onNext }: { read: ReadRecord; onNext(): void }) {
+export default function ResultCard({
+  read,
+  firstRead,
+  onNext,
+  onReadAgain,
+}: {
+  read: ReadRecord;
+  /** Present when this is a re-read; used to show improvement. */
+  firstRead?: ReadRecord;
+  onNext(): void;
+  onReadAgain(): void;
+}) {
   const p = placement(read.accuracy);
   const m = MESSAGES[p];
+  const gain = firstRead ? read.wcpm - firstRead.wcpm : 0;
   return (
     <div className="animate-pop relative flex flex-col gap-5 overflow-hidden rounded-3xl bg-white p-8 shadow">
       {p === "independent" && (
@@ -24,9 +36,15 @@ export default function ResultCard({ read, onNext }: { read: ReadRecord; onNext(
           ))}
         </div>
       )}
-      <div className="text-6xl">{m.emoji}</div>
-      <h2 className="text-3xl font-extrabold">{m.title}</h2>
-      <p className="text-lg text-slate-600">{m.sub}</p>
+      <div className="text-6xl">{firstRead ? "🔁" : m.emoji}</div>
+      <h2 className="text-3xl font-extrabold">
+        {firstRead ? (gain > 0 ? `Faster by ${gain} words a minute!` : "Nice, you read it again!") : m.title}
+      </h2>
+      <p className="text-lg text-slate-600">
+        {firstRead
+          ? "Reading the same page twice is how readers get smooth. Ready to move on?"
+          : m.sub}
+      </p>
       <div className="flex gap-6 text-lg">
         <div>
           <div className="text-4xl font-extrabold text-indigo-700">{read.correct}/{read.total}</div>
@@ -56,13 +74,22 @@ export default function ResultCard({ read, onNext }: { read: ReadRecord; onNext(
           </div>
         </div>
       )}
-      <button
-        type="button"
-        onClick={onNext}
-        className="self-start rounded-full bg-indigo-600 px-8 py-4 text-xl font-bold text-white shadow hover:bg-indigo-500"
-      >
-        Next →
-      </button>
+      <div className="flex flex-wrap gap-3">
+        <button
+          type="button"
+          onClick={onNext}
+          className="rounded-full bg-indigo-600 px-8 py-4 text-xl font-bold text-white shadow hover:bg-indigo-500"
+        >
+          Next →
+        </button>
+        <button
+          type="button"
+          onClick={onReadAgain}
+          className="rounded-full bg-white px-8 py-4 text-xl font-bold text-indigo-700 ring-2 ring-indigo-200 hover:bg-indigo-50"
+        >
+          🔁 Read it again
+        </button>
+      </div>
     </div>
   );
 }
