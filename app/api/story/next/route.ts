@@ -2,6 +2,7 @@ import { generateText, NoObjectGeneratedError, Output } from "ai";
 import { NextPageRequestSchema, StoryPageSchema, type StoryPage } from "@/lib/schema";
 import { SYSTEM_PROMPT, buildUserPrompt } from "@/lib/prompts";
 import { getStoryModel, storyModelId } from "@/lib/llm";
+import { mockPage } from "@/lib/mock-story";
 
 export const maxDuration = 60;
 
@@ -37,6 +38,10 @@ export async function POST(request: Request) {
       { error: "Invalid request", issues: parsed.error.issues },
       { status: 400 },
     );
+  }
+
+  if (storyModelId() === "mock") {
+    return Response.json({ page: mockPage(parsed.data), model: "mock" });
   }
 
   const prompt = buildUserPrompt(parsed.data);
