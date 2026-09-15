@@ -283,7 +283,7 @@ export default function StoryGame({ sessionId }: { sessionId: string }) {
           <div className="text-7xl">🏆</div>
           <h2 className="text-3xl font-extrabold">The End!</h2>
           <p className="text-lg text-slate-600">
-            You read {session.pages.reduce((n, p) => n + (p.read?.correct ?? 0), 0)} words out loud.
+            You read {session.pages.reduce((n, p) => n + (p.read?.total ?? 0), 0)} words out loud.
             Amazing.
           </p>
           <div className="flex gap-3">

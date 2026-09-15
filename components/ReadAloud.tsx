@@ -16,22 +16,26 @@ interface Props {
   onDone(outcome: ReadAloudOutcome): void;
 }
 
-type Status = "idle" | "listening" | "done" | "unsupported" | "denied";
+type Status = "idle" | "listening" | "typing" | "done" | "unsupported" | "denied";
 
 export default function ReadAloud({ text, onDone }: Props) {
   const [status, setStatus] = useState<Status>("idle");
   const [transcript, setTranscript] = useState("");
+  const [typed, setTyped] = useState("");
   const [elapsed, setElapsed] = useState(0);
   const recRef = useRef<ReadAloudRecognizer | null>(null);
   const startedAt = useRef<number>(0);
 
   useEffect(() => {
-    if (status !== "listening") return;
+    if (status !== "listening" && status !== "typing") return;
     const id = setInterval(() => setElapsed(Date.now() - startedAt.current), 250);
     return () => clearInterval(id);
   }, [status]);
 
-  const alignment = useMemo(() => alignWords(text, transcript), [text, transcript]);
+  const alignment = useMemo(
+    () => alignWords(text, status === "typing" ? typed : transcript),
+    [text, transcript, typed, status],
+  );
 
   const start = useCallback(() => {
     if (!isSpeechSupported()) {
@@ -52,9 +56,17 @@ export default function ReadAloud({ text, onDone }: Props) {
     rec.start();
   }, []);
 
+  const startTyping = useCallback(() => {
+    setTranscript("");
+    setTyped("");
+    startedAt.current = Date.now();
+    setElapsed(0);
+    setStatus("typing");
+  }, []);
+
   const finish = useCallback(() => {
     const rec = recRef.current;
-    const finalTranscript = rec ? rec.stop() : transcript;
+    const finalTranscript = status === "typing" ? typed : rec ? rec.stop() : transcript;
     const elapsedMs = Date.now() - startedAt.current;
     const finalAlignment = alignWords(text, finalTranscript);
     setTranscript(finalTranscript);
@@ -66,7 +78,7 @@ export default function ReadAloud({ text, onDone }: Props) {
       wcpm: wcpm(finalAlignment.correct, elapsedMs),
       transcript: finalTranscript,
     });
-  }, [onDone, text, transcript]);
+  }, [onDone, text, transcript, typed, status]);
 
   useEffect(() => () => { recRef.current?.stop(); }, []);
 
@@ -101,8 +113,18 @@ export default function ReadAloud({ text, onDone }: Props) {
       {status === "unsupported" && (
         <p className="rounded-xl bg-amber-50 p-4 text-amber-900">
           Your browser can&apos;t listen yet. Please open Readalong in Google Chrome on a
-          computer or Android device.
+          computer or Android device — or a grown-up can type what you read below.
         </p>
+      )}
+      {status === "typing" && (
+        <textarea
+          autoFocus
+          value={typed}
+          onChange={(e) => setTyped(e.target.value)}
+          placeholder="Type the words as they are read aloud…"
+          className="min-h-24 rounded-2xl border-2 border-indigo-200 p-4 text-xl focus:border-indigo-500 focus:outline-none"
+          data-testid="typed-transcript"
+        />
       )}
       {status === "denied" && (
         <p className="rounded-xl bg-rose-50 p-4 text-rose-900">
@@ -112,7 +134,7 @@ export default function ReadAloud({ text, onDone }: Props) {
       )}
 
       <div className="flex items-center gap-4">
-        {status === "idle" && (
+        {(status === "idle" || status === "unsupported") && (
           <button
             type="button"
             onClick={start}
@@ -121,7 +143,17 @@ export default function ReadAloud({ text, onDone }: Props) {
             🎤 Start reading
           </button>
         )}
-        {status === "listening" && (
+        {(status === "idle" || status === "unsupported") && (
+          <button
+            type="button"
+            onClick={startTyping}
+            className="text-sm font-bold text-slate-400 underline-offset-2 hover:text-slate-600 hover:underline"
+            title="For browsers without speech recognition"
+          >
+            no microphone? type it
+          </button>
+        )}
+        {(status === "listening" || status === "typing") && (
           <>
             <button
               type="button"
@@ -132,7 +164,7 @@ export default function ReadAloud({ text, onDone }: Props) {
             </button>
             <span className="flex items-center gap-2 text-slate-500">
               <span className="inline-block h-3 w-3 animate-pulse rounded-full bg-rose-500" />
-              Listening… {seconds}s
+              {status === "typing" ? "Typing" : "Listening"}… {seconds}s
             </span>
           </>
         )}

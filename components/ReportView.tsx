@@ -87,19 +87,17 @@ export default function ReportView({ sessionId }: { sessionId: string }) {
         <h2 className="mb-4 text-xl font-extrabold">Fluency by page</h2>
         <p className="mb-4 text-sm text-slate-500">
           Words correct per minute (WCPM). The dashed line is the 50th-percentile spring norm for the
-          starting grade (Hasbrouck &amp; Tindal, 2017).
+          starting grade, {norm} WCPM (Hasbrouck &amp; Tindal, 2017).
         </p>
         <div className="relative flex h-48 items-end gap-3 border-b border-slate-200 pb-1">
           <div
             className="absolute left-0 right-0 border-t-2 border-dashed border-indigo-300"
             style={{ bottom: `${(norm / maxWcpm) * 100}%` }}
-          >
-            <span className="absolute -top-5 right-0 text-xs font-bold text-indigo-400">norm {norm}</span>
-          </div>
+          />
           {readPages.map((p) => {
             const pl = placement(p.read!.accuracy);
             return (
-              <div key={p.pageNumber} className="flex flex-1 flex-col items-center justify-end gap-1">
+              <div key={p.pageNumber} className="flex h-full flex-1 flex-col items-center justify-end gap-1">
                 <span className="text-sm font-bold">{p.read!.wcpm}</span>
                 <div
                   className={`w-full rounded-t-xl ${PLACEMENT_STYLE[pl]}`}
@@ -133,7 +131,8 @@ export default function ReportView({ sessionId }: { sessionId: string }) {
 
       <section className="rounded-3xl bg-white p-6 shadow">
         <h2 className="mb-2 text-xl font-extrabold">Page by page</h2>
-        <table className="w-full text-left text-sm">
+        <div className="overflow-x-auto">
+        <table className="w-full min-w-[520px] text-left text-sm [&_td]:pr-3 [&_th]:pr-3">
           <thead className="text-slate-500">
             <tr>
               <th className="py-2">Page</th>
@@ -172,6 +171,7 @@ export default function ReportView({ sessionId }: { sessionId: string }) {
             ))}
           </tbody>
         </table>
+        </div>
       </section>
 
       <section className="rounded-3xl bg-white p-6 shadow">
@@ -194,7 +194,9 @@ export default function ReportView({ sessionId }: { sessionId: string }) {
         )}
         <h3 className="mt-6 mb-2 font-extrabold">New words learned</h3>
         <div className="flex flex-wrap gap-2">
-          {session.pages.flatMap((p) => p.page.targetWords).map((w) => (
+          {Array.from(
+            new Map(session.pages.flatMap((p) => p.page.targetWords).map((w) => [w.word, w])).values(),
+          ).map((w) => (
             <button
               key={w.word}
               type="button"
