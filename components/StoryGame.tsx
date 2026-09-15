@@ -28,6 +28,7 @@ export default function StoryGame({ sessionId }: { sessionId: string }) {
   const [error, setError] = useState<string | null>(null);
   const [loadingLine, setLoadingLine] = useState(0);
   const [attempt, setAttempt] = useState(0);
+  const [retryIn, setRetryIn] = useState<number | null>(null);
   const fetching = useRef(false);
 
   const current: PageRecord | undefined = session?.pages[session.pages.length - 1];
@@ -74,7 +75,10 @@ export default function StoryGame({ sessionId }: { sessionId: string }) {
         setAttempt(0);
         setPhase("reading");
       } catch (e) {
-        setError(e instanceof Error ? e.message : "Something went wrong");
+        const msg = e instanceof Error ? e.message : "Something went wrong";
+        setError(msg);
+        // Free-tier quota / demand errors clear themselves; retry automatically.
+        setRetryIn(/minute|cooling|rate-limited|high demand/i.test(msg) ? 45 : null);
         setPhase("error");
       } finally {
         fetching.current = false;
@@ -111,6 +115,17 @@ export default function StoryGame({ sessionId }: { sessionId: string }) {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [sessionId]);
+
+  useEffect(() => {
+    if (phase !== "error" || retryIn === null || !session) return;
+    if (retryIn <= 0) {
+      setRetryIn(null);
+      void fetchNextPage(session);
+      return;
+    }
+    const id = setTimeout(() => setRetryIn((r) => (r === null ? null : r - 1)), 1000);
+    return () => clearTimeout(id);
+  }, [phase, retryIn, session, fetchNextPage]);
 
   useEffect(() => {
     if (phase !== "loading") return;
@@ -178,16 +193,22 @@ export default function StoryGame({ sessionId }: { sessionId: string }) {
     return (
       <Shell world={world} session={session}>
         <div className="rounded-3xl bg-white p-8 shadow">
-          <h2 className="text-2xl font-extrabold">Oops.</h2>
+          <h2 className="text-2xl font-extrabold">{retryIn !== null ? "The owl needs a breather…" : "Oops."}</h2>
           <p className="mt-2 text-slate-600">{error}</p>
+          {retryIn !== null && (
+            <p className="mt-2 font-bold text-indigo-700">Trying again in {retryIn}s…</p>
+          )}
           <div className="mt-6 flex gap-3">
             {session && (
               <button
                 type="button"
-                onClick={() => fetchNextPage(session)}
+                onClick={() => {
+                  setRetryIn(null);
+                  void fetchNextPage(session);
+                }}
                 className="rounded-full bg-indigo-600 px-6 py-3 font-bold text-white"
               >
-                Try again
+                Try again now
               </button>
             )}
             <Link href="/" className="rounded-full bg-slate-200 px-6 py-3 font-bold">
