@@ -29,5 +29,7 @@
     "tailwindcss": "^4",
     "typescript": "^5",
     "vitest": "^4.1.11"
-  }
+  },
+  "license": "MIT",
+  "description": "Adaptive read-aloud story game for K–3 readers"
 }

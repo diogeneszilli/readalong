@@ -33,7 +33,14 @@ never leaves the device. Reading results are stored only in the browser's localS
 | typescript, eslint, eslint-config-next | Apache-2.0 / MIT |
 | vitest | MIT |
 
-Run `npx license-checker --failOn "GPL;LGPL;AGPL;SSPL"` to verify.
+Run `npx license-checker --production --summary` to verify. Two transitive entries need a note:
+
+- **`sharp` / `@img/sharp-libvips-*` (LGPL-3.0-or-later)** is an *optional* dependency of the
+  Next.js framework, used only by its `<Image>` optimization pipeline. This app has no `next/image`
+  usage and sets `images: { unoptimized: true }` in `next.config.ts`, so the library is never
+  loaded, linked, or invoked. It is not part of the Entry's code and no Entry code derives from it.
+- **`caniuse-lite` (CC-BY-4.0)** is browser-support *data* pulled in by the CSS toolchain at build
+  time; it is not copyleft and ships no code into the app.
 
 ## Datasets, models, media
 
