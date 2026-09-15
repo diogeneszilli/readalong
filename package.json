@@ -8,7 +8,8 @@
     "start": "next start",
     "lint": "eslint",
     "test": "vitest run",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "gen:openings": "node scripts/gen-openings.mjs"
   },
   "dependencies": {
     "@ai-sdk/google": "^3.0.122",

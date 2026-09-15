@@ -1,27 +1,45 @@
 import { generateText, NoObjectGeneratedError, Output } from "ai";
 import { NextPageRequestSchema, StoryPageSchema, type StoryPage } from "@/lib/schema";
 import { SYSTEM_PROMPT, buildUserPrompt } from "@/lib/prompts";
-import { getStoryModel, storyModelId } from "@/lib/llm";
+import {
+  getStoryModel,
+  isCoolingDown,
+  isMockMode,
+  noteFailure,
+  storyModelChain,
+} from "@/lib/llm";
 import { mockPage } from "@/lib/mock-story";
+import { getOpening } from "@/lib/openings";
 
 export const maxDuration = 60;
 
-async function generatePage(prompt: string): Promise<StoryPage> {
+/** Per-model timeout so a stalled endpoint falls through to the next model. */
+const MODEL_TIMEOUT_MS = 20_000;
+
+async function generatePage(modelId: string, prompt: string): Promise<StoryPage> {
   const { output } = await generateText({
-    model: getStoryModel(),
+    model: getStoryModel(modelId),
     system: SYSTEM_PROMPT,
     prompt,
     output: Output.object({ schema: StoryPageSchema }),
     temperature: 0.8,
     // A page is ~300 output tokens; the rest is headroom so thinking never
-    // starves the JSON. Gemini 3 thinks by default, so keep it low here (not every Flash model accepts "minimal") —
-    // the task is constrained prose, not reasoning.
+    // starves the JSON. Gemini 3 thinks by default, so keep it low here
+    // (not every Flash model accepts "minimal") — the task is constrained prose.
     maxOutputTokens: 2500,
     providerOptions: { google: { thinkingConfig: { thinkingLevel: "low" } } },
-    // Free-tier Gemini allows ~5 requests/min; one retry with backoff keeps a page to ≤ 2 requests.
-    maxRetries: 1,
+    // Rotation across models is our retry; don't also retry inside a model.
+    maxRetries: 0,
+    abortSignal: AbortSignal.timeout(MODEL_TIMEOUT_MS),
   });
   return output;
+}
+
+function describe(err: unknown): string {
+  if (NoObjectGeneratedError.isInstance(err)) {
+    return err.finishReason === "length" ? "output cut off" : "invalid page";
+  }
+  return err instanceof Error ? err.message : String(err);
 }
 
 export async function POST(request: Request) {
@@ -39,29 +57,41 @@ export async function POST(request: Request) {
       { status: 400 },
     );
   }
+  const req = parsed.data;
 
-  if (storyModelId() === "mock") {
-    return Response.json({ page: mockPage(parsed.data), model: "mock" });
+  if (isMockMode()) {
+    return Response.json({ page: mockPage(req), model: "mock" });
   }
 
-  const prompt = buildUserPrompt(parsed.data);
+  // Page 1 doesn't depend on the reader: serve a pre-generated opening.
+  if (req.pageNumber === 1 && req.history.length === 0 && !req.skipCache) {
+    const opening = getOpening(req.world, req.level);
+    if (opening) return Response.json({ page: opening, model: "cache" });
+  }
 
-  // One retry: structured output occasionally fails schema validation.
-  let lastError: unknown;
-  for (let attempt = 0; attempt < 2; attempt++) {
+  const prompt = buildUserPrompt(req);
+  const failures: string[] = [];
+  let skipped = 0;
+
+  for (const modelId of storyModelChain()) {
+    if (isCoolingDown(modelId)) {
+      skipped++;
+      continue;
+    }
+    const started = Date.now();
     try {
-      const page = await generatePage(prompt);
-      return Response.json({ page, model: storyModelId() });
+      const page = await generatePage(modelId, prompt);
+      return Response.json({ page, model: modelId, ms: Date.now() - started, failures });
     } catch (err) {
-      lastError = err;
-      console.error(`story/next attempt ${attempt + 1} failed`, err);
+      const reason = noteFailure(modelId, describe(err));
+      failures.push(`${modelId}: ${reason}`);
+      console.warn(`story/next ${modelId} failed after ${Date.now() - started}ms: ${reason}`);
     }
   }
 
-  let message = lastError instanceof Error ? lastError.message : "Story generation failed";
-  if (NoObjectGeneratedError.isInstance(lastError) && lastError.finishReason === "length") {
-    message =
-      "The story got cut off before the page was finished. This usually means the model hit its output limit or the API quota.";
-  }
-  return Response.json({ error: message }, { status: 502 });
+  const hint =
+    skipped > 0 && failures.length === 0
+      ? "All story models are cooling down after quota or demand errors. Try again in a minute."
+      : "Every story model failed. The free tier may be rate-limited right now — try again in a minute.";
+  return Response.json({ error: hint, failures, skipped }, { status: 503 });
 }

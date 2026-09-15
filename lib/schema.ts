@@ -85,5 +85,7 @@ export const NextPageRequestSchema = z.object({
   totalPages: z.number().int().min(2).max(12).default(5),
   history: z.array(HistoryEntrySchema).default([]),
   lastResult: ReadResultSchema.optional(),
+  /** Dev/tooling only: bypass the pre-generated opening cache. */
+  skipCache: z.boolean().optional(),
 });
 export type NextPageRequest = z.infer<typeof NextPageRequestSchema>;
