@@ -10,18 +10,21 @@ export const WORLDS = [
     name: "Whispering Forest",
     emoji: "🌲",
     blurb: "Talking animals, a lost map, and a very old owl.",
+    hero: "Mia the fox",
   },
   {
     id: "space",
     name: "Star Station",
     emoji: "🚀",
     blurb: "A tiny robot, a broken ship, and a planet made of jelly.",
+    hero: "Bo the robot",
   },
   {
     id: "ocean",
     name: "Coral Kingdom",
     emoji: "🐠",
     blurb: "A brave crab, a sunken bell, and a shy giant squid.",
+    hero: "Sam the crab",
   },
 ] as const;
 export type WorldId = (typeof WORLDS)[number]["id"];

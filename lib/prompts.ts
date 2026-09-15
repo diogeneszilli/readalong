@@ -43,7 +43,13 @@ export function buildUserPrompt(req: NextPageRequest): string {
     }
   }
 
+  const heroLine =
+    req.history.length === 0
+      ? `MAIN CHARACTER: ${world.hero}`
+      : "MAIN CHARACTER: keep the same characters and names as the story so far.";
+
   return `WORLD: ${world.name} — ${world.blurb}
+${heroLine}
 
 READING LEVEL: ${spec.label} (${spec.grade})
 - About ${spec.words} words on this page (±20%).
