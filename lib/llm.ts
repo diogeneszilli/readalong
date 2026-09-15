@@ -1,22 +1,29 @@
 import { createGoogleGenerativeAI } from "@ai-sdk/google";
 
 /**
- * Story generation runs on Gemini via a Google AI Studio key. Model ID
- * verified against ai.google.dev/gemini-api/docs/models on 2026-09-15.
- * STORY_MODEL overrides the default without a code change.
+ * Story generation runs on Gemini via a Google AI Studio key.
+ *
+ * Non-secret defaults live in `.env` (committed):
+ *   STORY_MODEL        – Gemini model ID (verified at ai.google.dev/gemini-api/docs/models)
+ *   STORY_API_KEY_NAME – name of the env var that holds the secret key
+ * The secret itself lives in `.env.local` (git-ignored) under that name.
  */
-export const DEFAULT_STORY_MODEL = "gemini-3.8-flash";
+const FALLBACK_MODEL = "gemini-3.8-flash";
+const FALLBACK_KEY_NAME = "GOOGLE_GENERATIVE_AI_API_KEY";
 
 export function storyModelId(): string {
-  return process.env.STORY_MODEL ?? DEFAULT_STORY_MODEL;
+  return process.env.STORY_MODEL?.trim() || FALLBACK_MODEL;
+}
+
+export function storyApiKeyName(): string {
+  return process.env.STORY_API_KEY_NAME?.trim() || FALLBACK_KEY_NAME;
 }
 
 export function getStoryModel() {
-  const apiKey = process.env.GOOGLE_GENERATIVE_AI_API_KEY;
+  const keyName = storyApiKeyName();
+  const apiKey = process.env[keyName];
   if (!apiKey) {
-    throw new Error(
-      "GOOGLE_GENERATIVE_AI_API_KEY is not set. Copy .env.local.example to .env.local.",
-    );
+    throw new Error(`${keyName} is not set. Add it to .env.local (see .env.local.example).`);
   }
   const google = createGoogleGenerativeAI({ apiKey });
   return google(storyModelId());
