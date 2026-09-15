@@ -22,7 +22,7 @@ export function buildUserPrompt(req: NextPageRequest): string {
 
   const historyBlock =
     req.history.length === 0
-      ? "This is the FIRST page. Introduce the main character and the setting quickly, and end with a small hook."
+      ? "This is the FIRST page. Name the main character in the very first sentence (third person, e.g. \"Pip the fox\"), show the setting in one sentence, and end with a small hook. Never write in first person."
       : req.history
           .map(
             (h, i) =>

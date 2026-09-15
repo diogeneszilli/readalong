@@ -22,3 +22,21 @@ body {
 .animate-pop {
   animation: pop 220ms ease-out both;
 }
+
+@keyframes confetti {
+  0% {
+    transform: translateY(-40px) rotate(0deg);
+    opacity: 0;
+  }
+  20% {
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(120px) rotate(180deg);
+    opacity: 0;
+  }
+}
+
+.animate-confetti {
+  animation: confetti 1.6s ease-in both;
+}

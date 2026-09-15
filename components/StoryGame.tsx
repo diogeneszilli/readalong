@@ -7,8 +7,9 @@ import ResultCard from "@/components/ResultCard";
 import QuestionCard from "@/components/QuestionCard";
 import VocabCard from "@/components/VocabCard";
 import ChoiceButtons from "@/components/ChoiceButtons";
+import ProgressDots from "@/components/ProgressDots";
 import { WORLDS, type StoryPage } from "@/lib/schema";
-import { LEVELS, nextLevel } from "@/lib/leveling";
+import { nextLevel } from "@/lib/leveling";
 import { getSession, saveSession, type PageRecord, type Session } from "@/lib/storage";
 import { speak } from "@/lib/speech";
 
@@ -206,12 +207,7 @@ export default function StoryGame({ sessionId }: { sessionId: string }) {
 
       {current && phase === "reading" && (
         <div className="flex flex-col gap-6 rounded-3xl bg-white p-8 shadow">
-          <div className="flex items-center justify-between text-sm font-bold uppercase tracking-wide text-slate-500">
-            <span>
-              Page {current.pageNumber} of {session.totalPages}
-            </span>
-            <span>{LEVELS[current.level].label}</span>
-          </div>
+          <ProgressDots page={current.pageNumber} total={session.totalPages} level={current.level} />
           <h2 className="text-2xl font-extrabold text-indigo-700">{current.page.title}</h2>
           <p className="text-slate-500">
             Read this page out loud. Tap any word to hear it.{" "}
@@ -221,6 +217,10 @@ export default function StoryGame({ sessionId }: { sessionId: string }) {
           </p>
           <ReadAloud key={current.pageNumber} text={current.page.text} onDone={onReadDone} />
         </div>
+      )}
+
+      {current && phase !== "reading" && phase !== "loading" && phase !== "ending" && (
+        <ProgressDots page={current.pageNumber} total={session.totalPages} level={current.level} />
       )}
 
       {current?.read && phase === "result" && (

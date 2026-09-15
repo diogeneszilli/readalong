@@ -14,7 +14,16 @@ export default function ResultCard({ read, onNext }: { read: ReadRecord; onNext(
   const p = placement(read.accuracy);
   const m = MESSAGES[p];
   return (
-    <div className="animate-pop flex flex-col gap-5 rounded-3xl bg-white p-8 shadow">
+    <div className="animate-pop relative flex flex-col gap-5 overflow-hidden rounded-3xl bg-white p-8 shadow">
+      {p === "independent" && (
+        <div aria-hidden className="pointer-events-none absolute inset-x-0 top-0 flex justify-around text-3xl">
+          {["🎉", "⭐", "🎊", "✨", "🌟", "🎉"].map((e, i) => (
+            <span key={i} className="animate-confetti" style={{ animationDelay: `${i * 120}ms` }}>
+              {e}
+            </span>
+          ))}
+        </div>
+      )}
       <div className="text-6xl">{m.emoji}</div>
       <h2 className="text-3xl font-extrabold">{m.title}</h2>
       <p className="text-lg text-slate-600">{m.sub}</p>
