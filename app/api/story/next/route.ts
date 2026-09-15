@@ -13,10 +13,10 @@ async function generatePage(prompt: string): Promise<StoryPage> {
     output: Output.object({ schema: StoryPageSchema }),
     temperature: 0.8,
     // A page is ~300 output tokens; the rest is headroom so thinking never
-    // starves the JSON. Gemini 3 thinks by default, so keep it minimal here —
+    // starves the JSON. Gemini 3 thinks by default, so keep it low here (not every Flash model accepts "minimal") —
     // the task is constrained prose, not reasoning.
     maxOutputTokens: 2500,
-    providerOptions: { google: { thinkingConfig: { thinkingLevel: "minimal" } } },
+    providerOptions: { google: { thinkingConfig: { thinkingLevel: "low" } } },
     // Free-tier Gemini allows ~5 requests/min; one retry with backoff keeps a page to ≤ 2 requests.
     maxRetries: 1,
   });
