@@ -14,8 +14,6 @@ export interface ReadAloudOutcome {
 interface Props {
   text: string;
   onDone(outcome: ReadAloudOutcome): void;
-  /** Lets the parent re-key the component to reset it for a new page. */
-  autoFocusMic?: boolean;
 }
 
 type Status = "idle" | "listening" | "done" | "unsupported" | "denied";
@@ -28,10 +26,6 @@ export default function ReadAloud({ text, onDone }: Props) {
   const startedAt = useRef<number>(0);
 
   useEffect(() => {
-    if (!isSpeechSupported()) setStatus("unsupported");
-  }, []);
-
-  useEffect(() => {
     if (status !== "listening") return;
     const id = setInterval(() => setElapsed(Date.now() - startedAt.current), 250);
     return () => clearInterval(id);
@@ -40,6 +34,10 @@ export default function ReadAloud({ text, onDone }: Props) {
   const alignment = useMemo(() => alignWords(text, transcript), [text, transcript]);
 
   const start = useCallback(() => {
+    if (!isSpeechSupported()) {
+      setStatus("unsupported");
+      return;
+    }
     const rec = new ReadAloudRecognizer({
       onTranscript: (full) => setTranscript(full),
       onError: (code) => {
