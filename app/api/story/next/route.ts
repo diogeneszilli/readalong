@@ -1,4 +1,4 @@
-import { generateText, Output } from "ai";
+import { generateText, NoObjectGeneratedError, Output } from "ai";
 import { NextPageRequestSchema, StoryPageSchema, type StoryPage } from "@/lib/schema";
 import { SYSTEM_PROMPT, buildUserPrompt } from "@/lib/prompts";
 import { getOpenRouter, storyModelId } from "@/lib/llm";
@@ -48,6 +48,10 @@ export async function POST(request: Request) {
     }
   }
 
-  const message = lastError instanceof Error ? lastError.message : "Story generation failed";
+  let message = lastError instanceof Error ? lastError.message : "Story generation failed";
+  if (NoObjectGeneratedError.isInstance(lastError) && lastError.finishReason === "length") {
+    message =
+      "The story got cut off before the page was finished. This usually means the OpenRouter account is out of credits.";
+  }
   return Response.json({ error: message }, { status: 502 });
 }
