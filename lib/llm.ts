@@ -8,7 +8,7 @@ import { createGoogleGenerativeAI } from "@ai-sdk/google";
  *   STORY_API_KEY_NAME – name of the env var that holds the secret key
  * The secret itself lives in `.env.local` (git-ignored) under that name.
  */
-const FALLBACK_MODEL = "gemini-3.8-flash";
+const FALLBACK_MODEL = "gemini-3.6-flash";
 const FALLBACK_KEY_NAME = "GOOGLE_GENERATIVE_AI_API_KEY";
 
 export function storyModelId(): string {

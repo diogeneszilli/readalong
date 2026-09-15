@@ -12,7 +12,13 @@ async function generatePage(prompt: string): Promise<StoryPage> {
     prompt,
     output: Output.object({ schema: StoryPageSchema }),
     temperature: 0.8,
-    maxOutputTokens: 1200,
+    // A page is ~300 output tokens; the rest is headroom so thinking never
+    // starves the JSON. Gemini 3 thinks by default, so keep it minimal here —
+    // the task is constrained prose, not reasoning.
+    maxOutputTokens: 2500,
+    providerOptions: { google: { thinkingConfig: { thinkingLevel: "minimal" } } },
+    // Free-tier Gemini allows ~5 requests/min; keep a page to ≤ 2 requests total.
+    maxRetries: 0,
   });
   return output;
 }
