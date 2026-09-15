@@ -18,12 +18,19 @@ for (const world of WORLDS) {
     const key = `${world}:${level}`;
     openings[key] ??= [];
     while (openings[key].length < VARIANTS) {
-      const res = await fetch(`${BASE}/api/story/next`, {
-        method: "POST",
-        headers: { "content-type": "application/json" },
-        body: JSON.stringify({ world, level, pageNumber: 1, totalPages: 5, skipCache: true }),
-      });
-      const data = await res.json();
+      let data;
+      try {
+        const res = await fetch(`${BASE}/api/story/next`, {
+          method: "POST",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify({ world, level, pageNumber: 1, totalPages: 5, skipCache: true }),
+        });
+        data = await res.json();
+      } catch (err) {
+        console.log(`${key}: network error (${err.cause?.code ?? err.message}); retrying in 10s`);
+        await sleep(10_000);
+        continue;
+      }
       if (!data.page) {
         console.log(`${key}: FAILED ${data.error} ${JSON.stringify(data.failures ?? [])}`);
         await sleep(60_000);

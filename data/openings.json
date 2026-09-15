@@ -1,1 +1,366 @@
-{}
+{
+  "forest:1": [
+    {
+      "title": "Mia and the Map",
+      "text": "Mia the fox is in the big woods. She can see a map. It is on a log. Can Mia get the map?",
+      "targetWords": [
+        {
+          "word": "woods",
+          "kidDefinition": "A large place with many trees."
+        }
+      ],
+      "question": {
+        "kind": "literal",
+        "prompt": "Where is the map?",
+        "options": [
+          "On a log",
+          "In a tree",
+          "On a rock"
+        ],
+        "answerIndex": 0
+      },
+      "choices": [
+        {
+          "label": "Take the map"
+        },
+        {
+          "label": "Look at the map"
+        }
+      ],
+      "isEnding": false,
+      "illustrationPrompt": "A cute orange fox looking at a paper map resting on a wooden log in a sunny green forest."
+    }
+  ],
+  "forest:2": [
+    {
+      "title": "Mia and the Lost Map",
+      "text": "Mia the fox lived in a green forest. The tall trees whispered in the wind. Mia found an old map on a big rock. She looked at the red star.",
+      "targetWords": [
+        {
+          "word": "whispered",
+          "kidDefinition": "Whispered means to speak in a very quiet voice."
+        }
+      ],
+      "question": {
+        "kind": "literal",
+        "prompt": "What did Mia find on the big rock?",
+        "options": [
+          "A red hat",
+          "An old map",
+          "A soft leaf"
+        ],
+        "answerIndex": 1
+      },
+      "choices": [
+        {
+          "label": "Follow the red star"
+        },
+        {
+          "label": "Ask the wise owl"
+        }
+      ],
+      "isEnding": false,
+      "illustrationPrompt": "A cute little fox standing on a big mossy rock in a green forest, looking down at a paper map."
+    }
+  ],
+  "forest:4": [
+    {
+      "title": "The Lost Map",
+      "text": "Mia the fox trotted into the whispering forest. The tall green trees whispered secret tales in the soft breeze. Mia held a rolled paper tightly in her paw. It was an old map leading to a hidden treasure. A tiny blue bird landed on a branch and chirped a warning. Mia stopped walking and looked around with a curious grin.",
+      "targetWords": [
+        {
+          "word": "curious",
+          "kidDefinition": "Curious means wanting to learn or know more about something."
+        }
+      ],
+      "question": {
+        "kind": "literal",
+        "prompt": "What did Mia hold in her paw?",
+        "options": [
+          "A shiny red apple",
+          "An old map",
+          "A tiny blue bird"
+        ],
+        "answerIndex": 1
+      },
+      "choices": [
+        {
+          "label": "Ask the bird for help"
+        },
+        {
+          "label": "Open the map to read"
+        }
+      ],
+      "isEnding": false,
+      "illustrationPrompt": "A cute red fox holding a rolled paper stands in a sunny, magical green forest with a little blue bird on a branch."
+    }
+  ],
+  "forest:5": [
+    {
+      "title": "The Whispering Map",
+      "text": "Mia the fox trotted through the emerald canopy of the Whispering Forest. Golden sunlight filtered through the tall pine trees, casting dancing shadows on the mossy ground. Mia carried a leather pouch containing an ancient map with glowing golden ink. Suddenly, the map began to shimmer and fold itself into a tiny paper bird. The little bird fluttered its wings and chirped a cheerful melody, pointing its beak toward a hidden trail. Mia knew she had to make a swift decision before the magical guide flew away.",
+      "targetWords": [
+        {
+          "word": "canopy",
+          "kidDefinition": "The high leafy roof formed by the tops of the trees."
+        },
+        {
+          "word": "ancient",
+          "kidDefinition": "Something that is very, very old."
+        }
+      ],
+      "question": {
+        "kind": "literal",
+        "prompt": "What did the map turn into?",
+        "options": [
+          "A tiny paper bird",
+          "A shiny golden coin",
+          "A soft leather pouch"
+        ],
+        "answerIndex": 0
+      },
+      "choices": [
+        {
+          "label": "Follow the paper bird"
+        },
+        {
+          "label": "Search the mossy ground"
+        }
+      ],
+      "isEnding": false,
+      "illustrationPrompt": "A bright digital painting of a friendly red fox looking at a glowing paper bird in a sunlit forest."
+    }
+  ],
+  "space:1": [
+    {
+      "title": "Star Station",
+      "text": "Bo the robot is on a big ship. The ship is red. It can not go. Oh no! Bo sees a jam planet.",
+      "targetWords": [
+        {
+          "word": "jam",
+          "kidDefinition": "Jam is sweet food made from fruit."
+        }
+      ],
+      "question": {
+        "kind": "literal",
+        "prompt": "What does Bo see?",
+        "options": [
+          "A jam planet",
+          "A big dog",
+          "A red cup"
+        ],
+        "answerIndex": 0
+      },
+      "choices": [
+        {
+          "label": "Land on the jam planet"
+        },
+        {
+          "label": "Fix the red ship"
+        }
+      ],
+      "isEnding": false,
+      "illustrationPrompt": "A cute little robot looks out the window of a red spaceship at a bright pink planet made of jelly."
+    }
+  ],
+  "space:2": [
+    {
+      "title": "Bo and the Jelly Planet",
+      "text": "Bo the robot is on a big ship. The ship has a bad leak. Bo looks out and spots a pink planet made of sweet jelly. He must fix his ship fast.",
+      "targetWords": [
+        {
+          "word": "spots",
+          "kidDefinition": "Spots means to see or notice something with your eyes."
+        }
+      ],
+      "question": {
+        "kind": "literal",
+        "prompt": "What is the pink planet made of?",
+        "options": [
+          "sweet jelly",
+          "cold ice",
+          "hard rock"
+        ],
+        "answerIndex": 0
+      },
+      "choices": [
+        {
+          "label": "Land on the jelly planet"
+        },
+        {
+          "label": "Fix the ship right now"
+        }
+      ],
+      "isEnding": false,
+      "illustrationPrompt": "A cute little robot looks out a spaceship window at a giant, wobbling pink planet made of jelly."
+    }
+  ],
+  "space:4": [
+    {
+      "title": "Star Station",
+      "text": "Bo the robot rolled across the shiny floor of the broken ship. Outside the window, a purple planet made of wobbly jelly shimmered in the dark space. Bo felt his small metal gears twist with worry. His ship could not fly home with a broken engine. He needed to find help before the sun went down. Suddenly, a bright green light flashed near the front door.",
+      "targetWords": [
+        {
+          "word": "shimmered",
+          "kidDefinition": "Shimmered means it shined with a soft, dancing light."
+        }
+      ],
+      "question": {
+        "kind": "literal",
+        "prompt": "What did the planet look like?",
+        "options": [
+          "It looked like a giant green rock.",
+          "It was a purple planet made of wobbly jelly.",
+          "It was a bright yellow star."
+        ],
+        "answerIndex": 1
+      },
+      "choices": [
+        {
+          "label": "Open the front door"
+        },
+        {
+          "label": "Look out the window"
+        }
+      ],
+      "isEnding": false,
+      "illustrationPrompt": "A cute little robot standing inside a spaceship looking out at a giant purple jelly planet."
+    }
+  ],
+  "space:5": [
+    {
+      "title": "Star Station",
+      "text": "Bo the robot lived on a shiny red spaceship far out in space. One day, his ship made a loud fizzing sound and sputtered to a complete stop. Bo peeked out his glowing window and gasped in utter surprise. Below him was a giant planet made entirely of wobbling purple jelly. His engine was completely broken, and he needed a soft place to land right away. Should he steer his pod toward the sweet jelly hills, or should he float past the sugary world to look for help?",
+      "targetWords": [
+        {
+          "word": "utter",
+          "kidDefinition": "Utter means complete and total."
+        },
+        {
+          "word": "sputtered",
+          "kidDefinition": "Sputtered means made popping and spitting noises while slowing down."
+        }
+      ],
+      "question": {
+        "kind": "literal",
+        "prompt": "What was the planet below Bo made of?",
+        "options": [
+          "Hard grey rocks",
+          "Wobbling purple jelly",
+          "Cold white snow"
+        ],
+        "answerIndex": 1
+      },
+      "choices": [
+        {
+          "label": "Land on the jelly hills"
+        },
+        {
+          "label": "Float past the sweet world"
+        }
+      ],
+      "isEnding": false,
+      "illustrationPrompt": "A cute little robot looks out a spaceship window at a giant, wobbling purple planet made of jelly in outer space."
+    }
+  ],
+  "ocean:1": [
+    {
+      "title": "Coral Kingdom",
+      "text": "Sam the crab is in a big sea. Sam sees a bell. The bell is old. Sam can go to it.",
+      "targetWords": [
+        {
+          "word": "old",
+          "kidDefinition": "Old means something has been here for a very long time."
+        }
+      ],
+      "question": {
+        "kind": "literal",
+        "prompt": "What does Sam see in the sea?",
+        "options": [
+          "A big bell",
+          "A red fish",
+          "A tall ship"
+        ],
+        "answerIndex": 0
+      },
+      "choices": [
+        {
+          "label": "Swim to the bell"
+        },
+        {
+          "label": "Dig in the sand"
+        }
+      ],
+      "isEnding": false,
+      "illustrationPrompt": "A cheerful little red crab looking at a large, rusted metal bell resting on the ocean floor among colorful coral."
+    }
+  ],
+  "ocean:2": [
+    {
+      "title": "Sam and the Sunken Bell",
+      "text": "Sam the crab was on the sand. The coral kingdom was bright and red. Sam heard a soft hum. He swam to a big stone. A golden bell sat deep down. It was under the weed. Who could ring it?",
+      "targetWords": [
+        {
+          "word": "coral",
+          "kidDefinition": "A hard, colorful rock that grows under the sea."
+        }
+      ],
+      "question": {
+        "kind": "literal",
+        "prompt": "What did Sam find under the weed?",
+        "options": [
+          "A shiny shell",
+          "A golden bell",
+          "A red star"
+        ],
+        "answerIndex": 1
+      },
+      "choices": [
+        {
+          "label": "Tap the bell with a claw"
+        },
+        {
+          "label": "Look under the green weed"
+        }
+      ],
+      "isEnding": false,
+      "illustrationPrompt": "A little red crab looks at a shiny golden bell resting on the ocean floor near colorful coral reefs."
+    }
+  ],
+  "ocean:4": [
+    {
+      "title": "Sam and the Sunken Bell",
+      "text": "Sam the crab walked across the bright, sandy floor of the Coral Kingdom. He waved his claw at the passing fish. Today was special because Sam found a shiny map hidden inside a shell. The map pointed toward the old, sunken bell near the deep cave. Sam felt very brave as he packed his bag. He wanted to see if the rumors about the bell were true. Should he swim to the cave or ask a friend for help?",
+      "targetWords": [
+        {
+          "word": "sunken",
+          "kidDefinition": "Something that has fallen or gone down to the bottom of the water."
+        },
+        {
+          "word": "rumors",
+          "kidDefinition": "Stories that people tell each other, even if they might not be true."
+        }
+      ],
+      "question": {
+        "kind": "literal",
+        "prompt": "What did Sam find inside the shell?",
+        "options": [
+          "A shiny map",
+          "A golden key",
+          "A new friend"
+        ],
+        "answerIndex": 0
+      },
+      "choices": [
+        {
+          "label": "Swim to the cave"
+        },
+        {
+          "label": "Ask a friend for help"
+        }
+      ],
+      "isEnding": false,
+      "illustrationPrompt": "A small, cheerful orange crab holding a piece of paper walks along a colorful, sunny coral reef."
+    }
+  ]
+}
