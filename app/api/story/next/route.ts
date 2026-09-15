@@ -1,14 +1,13 @@
 import { generateText, NoObjectGeneratedError, Output } from "ai";
 import { NextPageRequestSchema, StoryPageSchema, type StoryPage } from "@/lib/schema";
 import { SYSTEM_PROMPT, buildUserPrompt } from "@/lib/prompts";
-import { getOpenRouter, storyModelId } from "@/lib/llm";
+import { getStoryModel, storyModelId } from "@/lib/llm";
 
 export const maxDuration = 60;
 
 async function generatePage(prompt: string): Promise<StoryPage> {
-  const openrouter = getOpenRouter();
   const { output } = await generateText({
-    model: openrouter(storyModelId()),
+    model: getStoryModel(),
     system: SYSTEM_PROMPT,
     prompt,
     output: Output.object({ schema: StoryPageSchema }),
@@ -51,7 +50,7 @@ export async function POST(request: Request) {
   let message = lastError instanceof Error ? lastError.message : "Story generation failed";
   if (NoObjectGeneratedError.isInstance(lastError) && lastError.finishReason === "length") {
     message =
-      "The story got cut off before the page was finished. This usually means the OpenRouter account is out of credits.";
+      "The story got cut off before the page was finished. This usually means the model hit its output limit or the API quota.";
   }
   return Response.json({ error: message }, { status: 502 });
 }
