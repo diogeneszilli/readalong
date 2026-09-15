@@ -17,8 +17,8 @@ async function generatePage(prompt: string): Promise<StoryPage> {
     // the task is constrained prose, not reasoning.
     maxOutputTokens: 2500,
     providerOptions: { google: { thinkingConfig: { thinkingLevel: "minimal" } } },
-    // Free-tier Gemini allows ~5 requests/min; keep a page to ≤ 2 requests total.
-    maxRetries: 0,
+    // Free-tier Gemini allows ~5 requests/min; one retry with backoff keeps a page to ≤ 2 requests.
+    maxRetries: 1,
   });
   return output;
 }
