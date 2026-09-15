@@ -13,6 +13,7 @@ async function generatePage(prompt: string): Promise<StoryPage> {
     prompt,
     output: Output.object({ schema: StoryPageSchema }),
     temperature: 0.8,
+    maxOutputTokens: 1200,
   });
   return output;
 }
