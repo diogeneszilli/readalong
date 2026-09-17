@@ -38,6 +38,9 @@ adult a report they'd otherwise need a reading specialist to produce.
   definition a six-year-old understands and tap-to-hear pronunciation.
 - **Engagement** comes from a branching story: the child's choice changes what happens next, and
   the ending is always a good one.
+- **Illustrations** come from a pool of six hand-drawn scenes per world plus a hero character.
+  The model tags each page with the closest scene, so every page has a picture with no image API,
+  no latency and no licensing questions.
 - **Words to practise** are collected across the story and read aloud by the browser on tap, so
   the practice loop closes without an adult.
 
@@ -91,7 +94,8 @@ Configuration lives in `.env` (committed, non-secret) and `.env.local` (your key
 
 ```
 app/                 Next.js App Router pages + the story API route
-components/          ReadAloud (mic + live highlighting), Result/Question/Vocab/Choice cards, ReportView
+components/          ReadAloud (mic + live highlighting), Result/Question/Vocab/Choice cards, ReportView, SceneArt (SVG scenes)
+lib/scenes.ts        scene pool per world + hero; scene tag validation
 lib/align.ts         transcript ↔ text alignment, accuracy, WCPM
 lib/leveling.ts      Betts thresholds, level specs, WCPM norms
 lib/prompts.ts       system prompt + per-page prompt with adaptation notes

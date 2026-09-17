@@ -53,7 +53,8 @@ leaves the device except story text.
 - Phonics instruction, decoding lessons, or writing.
 - Native mobile apps.
 - Assessment-grade reliability of WCPM (browser speech recognition is not a proctored test).
-- Illustrations (no free-tier image model; deferred).
+- Per-moment AI-generated illustrations (no free-tier image model). v1 uses a fixed pool of
+  in-repo scenes instead — see FR-29.
 
 ## 5. User stories
 
@@ -118,7 +119,15 @@ leaves the device except story text.
 - FR-26 Words to practise (deduplicated missed words) and new words learned, all tap-to-hear.
 - FR-27 Home page lists recent stories with Continue / Report links.
 
-### 6.7 Persistence
+### 6.7 Illustration
+- FR-29 Each world has a pool of six hand-drawn SVG scenes (e.g. forest: clearing, log, stream,
+  cave, meadow, owl's oak) and a hero character. The model tags every page with the closest scene
+  id; the app renders that scene with the hero above the text. Invalid tags fall back to the
+  world's default scene. Art is in-repo, license-free, instant, and identical across devices.
+- FR-30 Home world cards and the ending screen reuse the same art. A `/scenes` page lists all
+  scenes for review.
+
+### 6.8 Persistence
 - FR-28 Sessions and results are stored in `localStorage`, keyed by session id; a story can be
   resumed at the exact phase it was left.
 
@@ -172,7 +181,8 @@ leaves the device except story text.
 | **M2 Free-tier hardening** (Tue/Wed) | Model rotation + cooldowns, cached openings, mock mode, auto-retry UX, typed fallback | Done |
 | **M3 Quality pass** (Wed) | Real-model story reviews at each level, prompt tuning, mobile polish, E2E walkthrough | In progress |
 | **M4 Demo** (Thu–Fri) | Mic test, rough → final video, README/SUBMISSION/DISCLOSURES, public repo, submission | Planned |
-| **Stretch** | Supabase progress across devices with keep-alive; illustrations (needs paid image model); second world | If ahead |
+| **M3b Scene art** (Wed) | 18 SVG scenes + 3 heroes, scene tagging in the prompt/schema, art on reading/ending/home | Done |
+| **Stretch** | Supabase progress across devices with keep-alive; per-moment AI illustrations (needs paid image model); second world | If ahead |
 
 ## 11. Risks and mitigations
 
@@ -191,6 +201,8 @@ leaves the device except story text.
 2. Should WCPM from the typed fallback be hidden or labelled, since it measures typing speed?
 3. Story length: 5 pages fits a demo; is 8–10 better for a real practice session?
 4. Kindergarten norm: no published ORF norm exists; keep the placeholder or drop the reference line?
+5. Animation: pages are static apart from word highlighting, card pop-ins and result confetti. Is a
+   subtle hero idle animation worth the distraction risk for early readers?
 
 ## 13. Appendix: level specification (summary)
 

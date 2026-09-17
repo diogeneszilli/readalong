@@ -48,7 +48,9 @@ Run `npx license-checker --production --summary` to verify. Two transitive entri
 - Reading-level thresholds (95% / 90% accuracy) follow the Betts (1946) informal reading inventory
   criteria. Fluency norms (WCPM by grade) are the Hasbrouck & Tindal (2017) 50th-percentile spring
   values. Both are published research, cited in the app.
-- No stock images, audio, or video. Emoji are rendered by the viewer's operating system.
+- No stock images, audio, or video. All illustrations (scene backgrounds and the three hero
+  characters) are original SVG drawings created for this entry and live in
+  `components/SceneArt.tsx`. Emoji are rendered by the viewer's operating system.
 
 ## Testing
 
