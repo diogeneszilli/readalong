@@ -119,12 +119,14 @@ export default function StoryGame({ sessionId }: { sessionId: string }) {
 
   useEffect(() => {
     if (phase !== "error" || retryIn === null || !session) return;
-    if (retryIn <= 0) {
-      setRetryIn(null);
-      void fetchNextPage(session);
-      return;
-    }
-    const id = setTimeout(() => setRetryIn((r) => (r === null ? null : r - 1)), 1000);
+    const id = setTimeout(() => {
+      if (retryIn <= 1) {
+        setRetryIn(null);
+        void fetchNextPage(session);
+      } else {
+        setRetryIn(retryIn - 1);
+      }
+    }, 1000);
     return () => clearTimeout(id);
   }, [phase, retryIn, session, fetchNextPage]);
 
