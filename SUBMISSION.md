@@ -23,8 +23,9 @@ Target: submit by 6 PM CT. Flip the GitHub repo to public first.
 
 **What it does**
 
-Readalong is a read-aloud story game for K–3 readers that acts as the patient listener most kids
-never get enough of.
+Readalong is a read-aloud story game for K–3 readers: a picture book that comes alive as the child
+reads it aloud. Words light up as they're spoken, the scene changes with the story, and the next
+page adapts to how the reading went.
 
 The child picks a world and a starting grade. Gemini writes a branching story one page at a time,
 constrained to one of six reading levels (word count, sentence length, phonics patterns, sight
