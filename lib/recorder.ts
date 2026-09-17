@@ -2,21 +2,62 @@
  * Records microphone audio as 16 kHz mono PCM and encodes it as WAV, which
  * every transcription model accepts. Runs alongside Web Speech recognition on
  * the same microphone; the WAV is only uploaded when the child taps "I'm done".
+ *
+ * One getUserMedia stream is opened and shared with the level meter, because
+ * Bluetooth headsets misbehave when the mic is opened several times at once.
  */
 export const TARGET_RATE = 16_000;
 
+export interface MicInfo {
+  label: string;
+  sampleRate?: number;
+  /** Heuristic: Bluetooth hands-free profile → narrowband, poor recognition. */
+  narrowband: boolean;
+  bluetooth: boolean;
+}
+
+export interface RecordingStats {
+  seconds: number;
+  /** RMS of the whole clip, 0..1, before normalisation. */
+  rms: number;
+  peak: number;
+}
+
+const AUDIO_CONSTRAINTS: MediaTrackConstraints = {
+  channelCount: 1,
+  echoCancellation: true,
+  noiseSuppression: true,
+  autoGainControl: true,
+};
+
+export async function openMicrophone(): Promise<MediaStream> {
+  if (typeof navigator === "undefined" || !navigator.mediaDevices?.getUserMedia) {
+    throw new Error("Microphone recording is not supported in this browser.");
+  }
+  return navigator.mediaDevices.getUserMedia({ audio: AUDIO_CONSTRAINTS });
+}
+
+export function describeMic(stream: MediaStream): MicInfo {
+  const track = stream.getAudioTracks()[0];
+  const label = track?.label ?? "";
+  const settings = (track?.getSettings?.() ?? {}) as { sampleRate?: number };
+  const bluetooth = /airpods|bluetooth|bt |headset|buds|beats|wh-|wf-/i.test(label);
+  const narrowband = (settings.sampleRate !== undefined && settings.sampleRate <= 16_000) || bluetooth;
+  return { label, sampleRate: settings.sampleRate, narrowband, bluetooth };
+}
+
 export class WavRecorder {
   private ctx: AudioContext | null = null;
-  private stream: MediaStream | null = null;
   private node: ScriptProcessorNode | null = null;
   private chunks: Float32Array[] = [];
   private inputRate = TARGET_RATE;
+  private ownsStream = false;
+  private stream: MediaStream | null = null;
 
-  async start(): Promise<void> {
-    if (typeof navigator === "undefined" || !navigator.mediaDevices?.getUserMedia) {
-      throw new Error("Microphone recording is not supported in this browser.");
-    }
-    this.stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+  /** Pass an already-open stream to share it; otherwise the recorder opens one. */
+  async start(stream?: MediaStream): Promise<MicInfo> {
+    this.stream = stream ?? (await openMicrophone());
+    this.ownsStream = !stream;
     this.ctx = new AudioContext();
     this.inputRate = this.ctx.sampleRate;
     const source = this.ctx.createMediaStreamSource(this.stream);
@@ -27,19 +68,22 @@ export class WavRecorder {
     };
     source.connect(this.node);
     this.node.connect(this.ctx.destination);
+    return describeMic(this.stream);
   }
 
-  /** Stops recording and returns a WAV blob (16 kHz, mono, 16-bit). */
-  stop(): Blob {
+  /** Stops recording and returns a normalised WAV blob (16 kHz, mono, 16-bit) plus stats. */
+  stop(): { blob: Blob; stats: RecordingStats } {
     this.node?.disconnect();
-    this.stream?.getTracks().forEach((t) => t.stop());
+    if (this.ownsStream) this.stream?.getTracks().forEach((t) => t.stop());
     void this.ctx?.close();
-    const samples = downsample(concat(this.chunks), this.inputRate, TARGET_RATE);
+    const raw = concat(this.chunks);
+    const stats: RecordingStats = { seconds: raw.length / this.inputRate, ...levels(raw) };
+    const samples = normalize(downsample(raw, this.inputRate, TARGET_RATE), stats.peak);
     this.chunks = [];
     this.node = null;
     this.stream = null;
     this.ctx = null;
-    return new Blob([encodeWav(samples, TARGET_RATE)], { type: "audio/wav" });
+    return { blob: new Blob([encodeWav(samples, TARGET_RATE)], { type: "audio/wav" }), stats };
   }
 
   get seconds(): number {
@@ -55,6 +99,30 @@ export function concat(chunks: Float32Array[]): Float32Array {
     out.set(c, offset);
     offset += c.length;
   }
+  return out;
+}
+
+export function levels(samples: Float32Array): { rms: number; peak: number } {
+  let sum = 0;
+  let peak = 0;
+  for (let i = 0; i < samples.length; i++) {
+    const v = samples[i];
+    sum += v * v;
+    const a = Math.abs(v);
+    if (a > peak) peak = a;
+  }
+  return { rms: samples.length ? Math.sqrt(sum / samples.length) : 0, peak };
+}
+
+/** Effectively silent clips must not be transcribed: models hallucinate words from noise. */
+export const SILENCE_RMS = 0.003;
+
+/** Scale so the loudest sample sits at -3 dBFS; leaves silence alone. */
+export function normalize(samples: Float32Array, peak: number): Float32Array {
+  if (peak < 0.01 || peak > 0.7) return samples;
+  const gain = 0.7 / peak;
+  const out = new Float32Array(samples.length);
+  for (let i = 0; i < samples.length; i++) out[i] = samples[i] * gain;
   return out;
 }
 

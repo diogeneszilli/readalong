@@ -4,7 +4,15 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { alignWords, wcpm, type AlignmentResult } from "@/lib/align";
 import { ReadAloudRecognizer, isSpeechSupported, speak } from "@/lib/speech";
 import { MicLevelMeter } from "@/lib/mic-level";
-import { WavRecorder, blobToBase64 } from "@/lib/recorder";
+import {
+  SILENCE_RMS,
+  WavRecorder,
+  blobToBase64,
+  describeMic,
+  openMicrophone,
+  type MicInfo,
+  type RecordingStats,
+} from "@/lib/recorder";
 
 /** Proper nouns the transcriber may hear; never the passage itself. */
 const NAME_HINTS = ["Mia", "Bo", "Sam", "Pip", "Max"];
@@ -38,6 +46,9 @@ export default function ReadAloud({ text, onDone, debug = false }: Props) {
   const [micError, setMicError] = useState<string | null>(null);
   const meterRef = useRef<MicLevelMeter | null>(null);
   const recorderRef = useRef<WavRecorder | null>(null);
+  const streamRef = useRef<MediaStream | null>(null);
+  const [micInfo, setMicInfo] = useState<MicInfo | null>(null);
+  const [clipStats, setClipStats] = useState<RecordingStats | null>(null);
   const [audioTranscript, setAudioTranscript] = useState<string | null>(null);
   const [scoreNote, setScoreNote] = useState<string | null>(null);
   const [elapsed, setElapsed] = useState(0);
@@ -96,10 +107,21 @@ export default function ReadAloud({ text, onDone, debug = false }: Props) {
     setElapsed(0);
     setStatus("starting");
     rec.start();
+    setMicInfo(null);
+    setClipStats(null);
     const recorder = new WavRecorder();
     recorderRef.current = recorder;
-    recorder
-      .start()
+    openMicrophone()
+      .then(async (stream) => {
+        streamRef.current = stream;
+        setMicInfo(describeMic(stream));
+        await recorder.start(stream);
+        if (debug) {
+          const meter = new MicLevelMeter(setLevel);
+          meterRef.current = meter;
+          await meter.start(stream);
+        }
+      })
       .catch((e: unknown) => {
         recorderRef.current = null;
         setScoreNote(`recording unavailable (${e instanceof Error ? e.message : String(e)})`);
@@ -108,11 +130,6 @@ export default function ReadAloud({ text, onDone, debug = false }: Props) {
         recorderReady = true;
         goIfReady();
       });
-    if (debug) {
-      const meter = new MicLevelMeter(setLevel);
-      meterRef.current = meter;
-      meter.start().catch((e: unknown) => setMicError(e instanceof Error ? e.message : String(e)));
-    }
   }, [debug]);
 
   const startTyping = useCallback(() => {
@@ -139,8 +156,13 @@ export default function ReadAloud({ text, onDone, debug = false }: Props) {
     if (status !== "typing" && recorder) {
       setStatus("scoring");
       try {
-        const blob = recorder.stop();
-        if (recorder.seconds > 0.5 || blob.size > 20_000) {
+        const { blob, stats } = recorder.stop();
+        setClipStats(stats);
+        if (stats.rms < SILENCE_RMS) {
+          setScoreNote(
+            "We couldn't hear anything in the recording — check the microphone (Bluetooth headsets often stay silent). Scoring from the browser instead.",
+          );
+        } else if (stats.seconds > 0.5) {
           const res = await fetch("/api/transcribe", {
             method: "POST",
             headers: { "content-type": "application/json" },
@@ -160,6 +182,8 @@ export default function ReadAloud({ text, onDone, debug = false }: Props) {
         setScoreNote(`audio scoring failed (${e instanceof Error ? e.message : String(e)}); using browser transcript`);
       }
     }
+    streamRef.current?.getTracks().forEach((t) => t.stop());
+    streamRef.current = null;
 
     const finalAlignment = alignWords(text, finalTranscript);
     setTranscript(finalTranscript);
@@ -184,6 +208,7 @@ export default function ReadAloud({ text, onDone, debug = false }: Props) {
       } catch {
         /* nothing to stop */
       }
+      streamRef.current?.getTracks().forEach((t) => t.stop());
     },
     [],
   );
@@ -237,6 +262,13 @@ export default function ReadAloud({ text, onDone, debug = false }: Props) {
           className="min-h-24 rounded-2xl border-2 border-indigo-200 p-4 text-xl focus:border-indigo-500 focus:outline-none"
           data-testid="typed-transcript"
         />
+      )}
+      {micInfo?.narrowband && status !== "done" && (
+        <p className="rounded-xl bg-amber-50 px-4 py-3 text-sm text-amber-900">
+          🎧 <span className="font-bold">{micInfo.bluetooth ? "Bluetooth headset detected." : "Low-quality microphone detected."}</span>{" "}
+          Headset mics switch to phone-call quality, so words get misheard. For fair scores, use the
+          computer&apos;s own microphone or a wired headset.
+        </p>
       )}
       {status === "denied" && (
         <p className="rounded-xl bg-rose-50 p-4 text-rose-900">
@@ -327,6 +359,18 @@ export default function ReadAloud({ text, onDone, debug = false }: Props) {
               </span>
             </div>
           )}
+          <div className="mt-2 flex gap-3">
+            <span className="w-24 shrink-0 text-slate-500">input</span>
+            <span className="text-slate-800">
+              {micInfo ? `${micInfo.label || "(unnamed)"}${micInfo.sampleRate ? ` · ${micInfo.sampleRate} Hz` : ""}${micInfo.narrowband ? " · NARROWBAND" : ""}` : "—"}
+              {clipStats && (
+                <span className="block text-xs text-slate-500">
+                  clip {clipStats.seconds.toFixed(1)}s · rms {clipStats.rms.toFixed(4)} · peak {clipStats.peak.toFixed(2)}
+                  {clipStats.rms < SILENCE_RMS ? " · SILENT" : ""}
+                </span>
+              )}
+            </span>
+          </div>
           <div className="mt-2 flex gap-3">
             <span className="w-24 shrink-0 text-slate-500">recognizer</span>
             <span className="text-slate-800">
