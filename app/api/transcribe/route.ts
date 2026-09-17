@@ -11,16 +11,21 @@ const MAX_AUDIO_BASE64 = 1_400_000;
 const BodySchema = z.object({
   audio: z.string().min(100).max(MAX_AUDIO_BASE64),
   mediaType: z.enum(["audio/wav", "audio/webm", "audio/ogg", "audio/mp4"]).default("audio/wav"),
-  /** Proper nouns that may appear (hero names); never the passage itself. */
-  hints: z.array(z.string()).max(10).default([]),
+  /** Vocabulary of the passage (unordered, deduplicated) + hero names — phrase hints, never the passage itself. */
+  hints: z.array(z.string().max(30)).max(80).default([]),
 });
 
-const PROMPT = (hints: string[]) => `A young child is practising reading aloud. Transcribe exactly what is spoken, word for word.
+const PROMPT = (hints: string[]) => `A young child is practising reading aloud from a short passage. Transcribe exactly what is spoken, word for word.
 - Lowercase, no punctuation, words separated by single spaces.
 - Keep mistakes, repeated words, false starts and self-corrections exactly as spoken. Do not fix them.
 - Never add words that were not said. Never guess a "correct" version.
 - If there is no speech, output an empty line.
-${hints.length ? `Names that may be spoken: ${hints.join(", ")}.` : ""}
+${
+  hints.length
+    ? `Phrase hints — the passage's vocabulary, in no particular order: ${hints.join(", ")}.
+Use these only to resolve audio that is genuinely ambiguous (e.g. a muffled consonant on a phone-quality microphone). If the child clearly says a different word, write what they said.`
+    : ""
+}
 Output only the words.`;
 
 export async function POST(request: Request) {

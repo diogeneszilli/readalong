@@ -14,8 +14,18 @@ import {
   type RecordingStats,
 } from "@/lib/recorder";
 
-/** Proper nouns the transcriber may hear; never the passage itself. */
+/** Proper nouns the transcriber may hear. */
 const NAME_HINTS = ["Mia", "Bo", "Sam", "Pip", "Max"];
+
+/** Phrase hints: the passage's vocabulary, deduplicated and unordered — never the passage itself. */
+function phraseHints(text: string): string[] {
+  const words = new Set<string>();
+  for (const raw of text.toLowerCase().split(/\s+/)) {
+    const w = raw.replace(/[^a-z']/g, "");
+    if (w.length >= 2) words.add(w);
+  }
+  return [...NAME_HINTS, ...Array.from(words)].slice(0, 80);
+}
 
 export interface ReadAloudOutcome {
   alignment: AlignmentResult;
@@ -166,7 +176,7 @@ export default function ReadAloud({ text, onDone, debug = false }: Props) {
           const res = await fetch("/api/transcribe", {
             method: "POST",
             headers: { "content-type": "application/json" },
-            body: JSON.stringify({ audio: await blobToBase64(blob), mediaType: "audio/wav", hints: NAME_HINTS }),
+            body: JSON.stringify({ audio: await blobToBase64(blob), mediaType: "audio/wav", hints: phraseHints(text) }),
           });
           const data = (await res.json()) as { transcript?: string; model?: string; error?: string };
           if (res.ok && typeof data.transcript === "string" && data.transcript.trim()) {
