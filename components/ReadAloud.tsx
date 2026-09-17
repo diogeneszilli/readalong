@@ -4,12 +4,20 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { alignWords, wcpm, type AlignmentResult } from "@/lib/align";
 import { ReadAloudRecognizer, isSpeechSupported, speak } from "@/lib/speech";
 import { MicLevelMeter } from "@/lib/mic-level";
+import { WavRecorder, blobToBase64 } from "@/lib/recorder";
+
+/** Proper nouns the transcriber may hear; never the passage itself. */
+const NAME_HINTS = ["Mia", "Bo", "Sam", "Pip", "Max"];
 
 export interface ReadAloudOutcome {
   alignment: AlignmentResult;
   elapsedMs: number;
   wcpm: number;
   transcript: string;
+  /** Where the scored transcript came from. */
+  source: "audio" | "browser" | "typed";
+  /** The browser's own live transcript, kept for diagnostics. */
+  browserTranscript: string;
 }
 
 interface Props {
@@ -19,7 +27,7 @@ interface Props {
   debug?: boolean;
 }
 
-type Status = "idle" | "starting" | "listening" | "typing" | "done" | "unsupported" | "denied";
+type Status = "idle" | "starting" | "listening" | "typing" | "scoring" | "done" | "unsupported" | "denied";
 
 export default function ReadAloud({ text, onDone, debug = false }: Props) {
   const [status, setStatus] = useState<Status>("idle");
@@ -29,6 +37,9 @@ export default function ReadAloud({ text, onDone, debug = false }: Props) {
   const [level, setLevel] = useState(0);
   const [micError, setMicError] = useState<string | null>(null);
   const meterRef = useRef<MicLevelMeter | null>(null);
+  const recorderRef = useRef<WavRecorder | null>(null);
+  const [audioTranscript, setAudioTranscript] = useState<string | null>(null);
+  const [scoreNote, setScoreNote] = useState<string | null>(null);
   const [elapsed, setElapsed] = useState(0);
   const recRef = useRef<ReadAloudRecognizer | null>(null);
   const startedAt = useRef<number>(0);
@@ -73,6 +84,14 @@ export default function ReadAloud({ text, onDone, debug = false }: Props) {
     setElapsed(0);
     setStatus("starting");
     rec.start();
+    setAudioTranscript(null);
+    setScoreNote(null);
+    const recorder = new WavRecorder();
+    recorderRef.current = recorder;
+    recorder.start().catch((e: unknown) => {
+      recorderRef.current = null;
+      setScoreNote(`recording unavailable (${e instanceof Error ? e.message : String(e)})`);
+    });
     if (debug) {
       const meter = new MicLevelMeter(setLevel);
       meterRef.current = meter;
@@ -88,12 +107,44 @@ export default function ReadAloud({ text, onDone, debug = false }: Props) {
     setStatus("typing");
   }, []);
 
-  const finish = useCallback(() => {
+  const finish = useCallback(async () => {
     meterRef.current?.stop();
     meterRef.current = null;
     const rec = recRef.current;
-    const finalTranscript = status === "typing" ? typed : rec ? rec.stop() : transcript;
+    const browserTranscript = status === "typing" ? typed : rec ? rec.stop() : transcript;
     const elapsedMs = Date.now() - startedAt.current;
+
+    let finalTranscript = browserTranscript;
+    let source: ReadAloudOutcome["source"] = status === "typing" ? "typed" : "browser";
+
+    // Authoritative transcript from the recorded audio, when we have one.
+    const recorder = recorderRef.current;
+    recorderRef.current = null;
+    if (status !== "typing" && recorder) {
+      setStatus("scoring");
+      try {
+        const blob = recorder.stop();
+        if (recorder.seconds > 0.5 || blob.size > 20_000) {
+          const res = await fetch("/api/transcribe", {
+            method: "POST",
+            headers: { "content-type": "application/json" },
+            body: JSON.stringify({ audio: await blobToBase64(blob), mediaType: "audio/wav", hints: NAME_HINTS }),
+          });
+          const data = (await res.json()) as { transcript?: string; model?: string; error?: string };
+          if (res.ok && typeof data.transcript === "string" && data.transcript.trim()) {
+            finalTranscript = data.transcript;
+            source = "audio";
+            setAudioTranscript(data.transcript);
+            setScoreNote(`scored from audio via ${data.model}`);
+          } else {
+            setScoreNote(data.error ?? "audio transcription returned nothing; using browser transcript");
+          }
+        }
+      } catch (e) {
+        setScoreNote(`audio scoring failed (${e instanceof Error ? e.message : String(e)}); using browser transcript`);
+      }
+    }
+
     const finalAlignment = alignWords(text, finalTranscript);
     setTranscript(finalTranscript);
     setElapsed(elapsedMs);
@@ -103,6 +154,8 @@ export default function ReadAloud({ text, onDone, debug = false }: Props) {
       elapsedMs,
       wcpm: wcpm(finalAlignment.correct, elapsedMs),
       transcript: finalTranscript,
+      source,
+      browserTranscript,
     });
   }, [onDone, text, transcript, typed, status]);
 
@@ -110,6 +163,11 @@ export default function ReadAloud({ text, onDone, debug = false }: Props) {
     () => () => {
       recRef.current?.stop();
       meterRef.current?.stop();
+      try {
+        recorderRef.current?.stop();
+      } catch {
+        /* nothing to stop */
+      }
     },
     [],
   );
@@ -212,6 +270,12 @@ export default function ReadAloud({ text, onDone, debug = false }: Props) {
             </span>
           </>
         )}
+        {status === "scoring" && (
+          <span className="flex items-center gap-3 text-xl font-bold text-indigo-600">
+            <span className="inline-block h-5 w-5 animate-spin rounded-full border-4 border-indigo-200 border-t-indigo-600" />
+            Checking your reading…
+          </span>
+        )}
         {status === "done" && (
           <span className="text-slate-500">
             {alignment.correct}/{alignment.total} words · {seconds}s
@@ -238,6 +302,15 @@ export default function ReadAloud({ text, onDone, debug = false }: Props) {
               {status === "listening" && interim && <span className="text-indigo-500"> {interim}</span>}
             </span>
           </div>
+          {(audioTranscript !== null || scoreNote) && (
+            <div className="mt-2 flex gap-3">
+              <span className="w-24 shrink-0 text-slate-500">audio</span>
+              <span className="flex-1 whitespace-pre-wrap text-slate-800">
+                {audioTranscript ?? <span className="text-slate-400">—</span>}
+                {scoreNote && <span className="block text-xs text-slate-500">{scoreNote}</span>}
+              </span>
+            </div>
+          )}
           <div className="mt-2 flex gap-3">
             <span className="w-24 shrink-0 text-slate-500">recognizer</span>
             <span className="text-slate-800">

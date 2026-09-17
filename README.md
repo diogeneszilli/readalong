@@ -54,8 +54,10 @@ Home  →  pick world + starting grade
   │                 pages 2–5 from Gemini, given: story so far, choice taken,
   │                 last read's accuracy + missed words, target level
   ▼
-Read aloud  ── Web Speech API transcript → LCS word alignment → per-word ok/close/missed
-  │            accuracy + WCPM computed in the browser; nothing leaves the device
+Read aloud  ── live: Web Speech API highlights words as the child reads
+  │            on "I'm done": the recorded clip (16 kHz WAV) is transcribed by Gemini,
+  │            then LCS word alignment (spelling + sound-alike) scores every word;
+  │            falls back to the browser transcript if transcription is unavailable
   ▼
 Result → Question → Vocab → Choice → next page (level adjusted) … → Ending → Report
 ```
@@ -64,12 +66,16 @@ Result → Question → Vocab → Choice → next page (level adjusted) … → 
   `@ai-sdk/google`, Zod-validated). Gemini's free tier is 5 requests/min and 20/day *per model*,
   so the route rotates across several Flash models with per-model cooldowns, and page 1 is served
   from `data/openings.json`. A story costs four live requests.
-- **Speech scoring** aligns expected words to the transcript with a longest-common-subsequence
-  DP and fuzzy equality, so skipped, inserted and substituted words all score correctly instead of
-  derailing after the first mistake.
-- **Privacy** is structural: audio never leaves the browser, sessions live in `localStorage`, and
-  the API only ever sees story text, level constraints and aggregate scores. No accounts, no
-  analytics, no personal data.
+- **Speech scoring** uses two transcripts. The browser's Web Speech API gives instant word
+  highlighting while the child reads. When they finish, the recorded audio goes to Gemini for an
+  accurate verbatim transcript (browser recognition alone scored a clean adult read at 58–67%).
+  Alignment is a longest-common-subsequence DP with spelling *and* sound-alike matching, so
+  skipped, inserted and substituted words score correctly and recognizer homophones (hat/head)
+  aren't counted against the child.
+- **Privacy:** sessions and results live in `localStorage`; no accounts, no analytics. The story
+  API sees only story text, level constraints and aggregate scores. The transcription API receives
+  the short audio clip of the page being read, with no name or other identifier attached, and
+  the clip is not stored by the app. A "type it" fallback works with no audio at all.
 
 ## Run it locally
 

@@ -86,10 +86,18 @@ leaves the device except story text.
   no requests for or mention of personal information.
 
 ### 6.3 Reading and scoring
-- FR-8 Browser speech recognition (Web Speech API, continuous, interim results) produces a transcript
-  while the child reads; the session auto-restarts across Chrome's silence timeouts.
-- FR-9 Words are aligned to the transcript with a longest-common-subsequence algorithm and fuzzy
-  matching (1 edit on 4+ letters, 2 on 7+), producing per-word ok / close / missed.
+- FR-8 Browser speech recognition (Web Speech API, continuous, interim results) produces a live
+  transcript for word highlighting while the child reads; the session auto-restarts across
+  Chrome's silence timeouts. Reading starts only after the recognizer confirms it is capturing
+  ("Get ready… / Go!"), so the first words are not lost.
+- FR-8b The read is recorded (16 kHz mono WAV). On "I'm done" the clip is transcribed server-side by
+  Gemini (verbatim, lowercase, no corrections, hero names as hints) and that transcript is the one
+  scored. If transcription is unavailable, the browser transcript is used. Rationale: browser
+  recognition scored a clean adult read at 58–67%; Gemini transcribed a synthetic clip
+  word-perfectly.
+- FR-9 Words are aligned to the transcript with a longest-common-subsequence algorithm, spelling
+  tolerance (1 edit on 4+ letters, 2 on 7+) and sound-alike tolerance (identical phonetic key, e.g.
+  hat/head, there/their), producing per-word ok / close / missed.
 - FR-10 Accuracy = (ok + close) / total words. WCPM = correct words / elapsed minutes.
 - FR-11 Words highlight live; missed words are marked after the child finishes; any word is
   tap-to-hear via browser TTS.
@@ -145,15 +153,18 @@ leaves the device except story text.
 
 ## 8. Non-functional requirements
 
-- **Privacy:** audio never leaves the browser; no accounts; no analytics; the API sees only story
-  text, level constraints and aggregate scores. No real student data used in development.
+- **Privacy:** no accounts; no analytics; sessions in localStorage. The story API sees only story
+  text, level constraints and aggregate scores. The transcription API receives the short clip of one
+  page being read with no identifier attached and the app does not store it; a typed fallback
+  needs no audio. No real student data used in development.
 - **Safety:** no biometric or emotion inference; content constraints in the system prompt; only
   the author appears in demo media.
 - **Performance:** page 1 instant (cache); pages 2–5 target < 6 s on Gemini Flash; UI transitions
   ≤ 250 ms.
 - **Cost:** must run on Google AI Studio's free tier (5 req/min, 20 req/day per model). Achieved via
-  model rotation with per-model cooldowns, cached openings (a story = 4 live requests), and
-  low-thinking generation.
+  model rotation with per-model cooldowns, cached openings, and low-thinking generation. A story
+  costs 4 page requests + up to 5 transcription requests (+ re-reads); five models × 20/day ≈ 10
+  stories/day.
 - **Resilience:** quota/demand errors show a friendly countdown and auto-retry; every model failing
   yields a clear message, never a blank page.
 - **Compatibility:** Chrome desktop/Android for speech; all browsers for the typed fallback and
@@ -189,7 +200,7 @@ leaves the device except story text.
 | Risk | Impact | Mitigation |
 |---|---|---|
 | Free-tier quota exhausted or "high demand" during judging | Story stalls after page 1 | Rotation across 5 models; cached page 1; countdown auto-retry; video carries the demo; billing toggle removes the risk entirely |
-| Browser speech recognition misreads a fluent child | Unfair frustration placement | Fuzzy "close" matching; LCS alignment tolerant of insertions; re-read option; adult typed fallback |
+| Speech recognition misreads a fluent child | Unfair frustration placement | Server transcription of the recorded audio (primary); sound-alike + spelling tolerance; start gate so first words aren't lost; re-read option; typed fallback |
 | Model writes off-level prose | Child frustrated or bored | Explicit per-level spec in prompt; adaptation note with missed words; reviewed per level in M3 |
 | Chrome-only speech | Some families excluded | Typed fallback; clear message naming Chrome |
 | Eligibility (residency clause) | Entry disqualified | Entrant's decision to proceed under LATAM hiring; direct application track in parallel |

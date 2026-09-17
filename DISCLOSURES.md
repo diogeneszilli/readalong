@@ -15,12 +15,16 @@ Required by the Nerdy AI Hackathon Challenge terms (third-party materials and AI
 
 | Service | Use | Data sent |
 |---|---|---|
-| Google Gemini API (`gemini-3.6-flash`) | Generates each story page as structured JSON | World name, reading-level constraints, the story text so far, the choice taken, and aggregate reading scores (accuracy %, WCPM, missed words). No names, ages, audio, or other personal data. |
+| Google Gemini API (Flash / Flash-Lite models) | Generates each story page as structured JSON | World name, reading-level constraints, the story text so far, the choice taken, and aggregate reading scores (accuracy %, WCPM, missed words). No names, ages, or other personal data. |
+| Google Gemini API (same models) | Transcribes the recorded read-aloud clip | A short 16 kHz mono WAV of the child reading one page (typically 10–40 s), plus a list of story character names as vocabulary hints. No name, account, device or session identifier is sent; the app does not store the audio. Google's free tier may use API inputs to improve its services. |
 | Vercel | Hosting | Standard request logs |
 | Google Fonts (Nunito, OFL) | Typography | Font requests only |
 
-Speech recognition and text-to-speech run entirely in the browser via the Web Speech API. Audio
-never leaves the device. Reading results are stored only in the browser's localStorage.
+Live word highlighting and text-to-speech run in the browser via the Web Speech API. Final
+scoring uses a Gemini transcription of the recorded clip (see above); if that is unavailable the
+browser transcript is used instead, and a typed fallback needs no audio at all. Reading results are
+stored only in the browser's localStorage. No biometric identification, voice-printing or emotion
+inference of any kind is performed; audio is used solely to produce a text transcript.
 
 ## Open-source dependencies (all permissive licenses; no GPL/LGPL/AGPL/SSPL)
 

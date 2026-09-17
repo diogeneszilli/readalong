@@ -59,7 +59,11 @@ export default function SpikePage() {
             <li>Accuracy: {(outcome.alignment.accuracy * 100).toFixed(0)}% ({placement(outcome.alignment.accuracy)})</li>
             <li>WCPM: {outcome.wcpm}</li>
             <li>Missed: {outcome.alignment.missedWords.join(", ") || "none"}</li>
-            <li className="text-sm text-slate-500">Heard: “{outcome.transcript}”</li>
+            <li className="text-sm text-slate-500">Scored from: {outcome.source}</li>
+            <li className="text-sm text-slate-500">Transcript used: “{outcome.transcript}”</li>
+            {outcome.source === "audio" && (
+              <li className="text-sm text-slate-400">Browser heard: “{outcome.browserTranscript}”</li>
+            )}
           </ul>
         </section>
       )}
