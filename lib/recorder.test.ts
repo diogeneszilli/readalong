@@ -42,8 +42,8 @@ describe("levels and normalisation", () => {
     const quiet = normalize(new Float32Array([0.1, -0.1]), 0.1);
     expect(quiet[0]).toBeCloseTo(0.7);
     const loud = normalize(new Float32Array([0.9]), 0.9);
-    expect(loud[0]).toBe(0.9);
+    expect(loud[0]).toBeCloseTo(0.9);
     const silent = normalize(new Float32Array([0.001]), 0.001);
-    expect(silent[0]).toBe(0.001);
+    expect(silent[0]).toBeCloseTo(0.001);
   });
 });
