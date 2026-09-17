@@ -45,7 +45,12 @@ export default function SpikePage() {
         </button>
       </div>
 
-      <ReadAloud key={`${level}-${attempt}`} text={SAMPLES[level]} onDone={setOutcome} />
+      <p className="text-sm text-slate-500">
+        The panel below shows the microphone level (should move when you talk) and the live
+        transcript the recognizer produces. If the level moves but nothing is heard, speech
+        recognition is the problem; if the level stays flat, the microphone is.
+      </p>
+      <ReadAloud key={`${level}-${attempt}`} text={SAMPLES[level]} onDone={setOutcome} debug />
 
       {outcome && (
         <section className="rounded-2xl bg-slate-50 p-6">

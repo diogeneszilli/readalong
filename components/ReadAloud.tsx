@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { alignWords, wcpm, type AlignmentResult } from "@/lib/align";
 import { ReadAloudRecognizer, isSpeechSupported, speak } from "@/lib/speech";
+import { MicLevelMeter } from "@/lib/mic-level";
 
 export interface ReadAloudOutcome {
   alignment: AlignmentResult;
@@ -14,14 +15,20 @@ export interface ReadAloudOutcome {
 interface Props {
   text: string;
   onDone(outcome: ReadAloudOutcome): void;
+  /** Show the live transcript and a microphone level meter (diagnostics). */
+  debug?: boolean;
 }
 
 type Status = "idle" | "listening" | "typing" | "done" | "unsupported" | "denied";
 
-export default function ReadAloud({ text, onDone }: Props) {
+export default function ReadAloud({ text, onDone, debug = false }: Props) {
   const [status, setStatus] = useState<Status>("idle");
   const [transcript, setTranscript] = useState("");
   const [typed, setTyped] = useState("");
+  const [interim, setInterim] = useState("");
+  const [level, setLevel] = useState(0);
+  const [micError, setMicError] = useState<string | null>(null);
+  const meterRef = useRef<MicLevelMeter | null>(null);
   const [elapsed, setElapsed] = useState(0);
   const recRef = useRef<ReadAloudRecognizer | null>(null);
   const startedAt = useRef<number>(0);
@@ -43,18 +50,29 @@ export default function ReadAloud({ text, onDone }: Props) {
       return;
     }
     const rec = new ReadAloudRecognizer({
-      onTranscript: (full) => setTranscript(full),
+      onTranscript: (full, partial) => {
+        setTranscript(full);
+        setInterim(partial);
+      },
       onError: (code) => {
         if (code === "not-allowed" || code === "service-not-allowed") setStatus("denied");
+        else setMicError(code);
       },
     });
     recRef.current = rec;
     setTranscript("");
+    setInterim("");
+    setMicError(null);
     startedAt.current = Date.now();
     setElapsed(0);
     setStatus("listening");
     rec.start();
-  }, []);
+    if (debug) {
+      const meter = new MicLevelMeter(setLevel);
+      meterRef.current = meter;
+      meter.start().catch((e: unknown) => setMicError(e instanceof Error ? e.message : String(e)));
+    }
+  }, [debug]);
 
   const startTyping = useCallback(() => {
     setTranscript("");
@@ -65,6 +83,8 @@ export default function ReadAloud({ text, onDone }: Props) {
   }, []);
 
   const finish = useCallback(() => {
+    meterRef.current?.stop();
+    meterRef.current = null;
     const rec = recRef.current;
     const finalTranscript = status === "typing" ? typed : rec ? rec.stop() : transcript;
     const elapsedMs = Date.now() - startedAt.current;
@@ -80,7 +100,13 @@ export default function ReadAloud({ text, onDone }: Props) {
     });
   }, [onDone, text, transcript, typed, status]);
 
-  useEffect(() => () => { recRef.current?.stop(); }, []);
+  useEffect(
+    () => () => {
+      recRef.current?.stop();
+      meterRef.current?.stop();
+    },
+    [],
+  );
 
   const seconds = (elapsed / 1000).toFixed(0);
 
@@ -174,6 +200,35 @@ export default function ReadAloud({ text, onDone }: Props) {
           </span>
         )}
       </div>
+
+      {debug && status !== "idle" && status !== "typing" && (
+        <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4 font-mono text-sm" data-testid="mic-debug">
+          <div className="mb-2 flex items-center gap-3">
+            <span className="w-24 shrink-0 text-slate-500">mic level</span>
+            <div className="h-3 flex-1 overflow-hidden rounded-full bg-slate-200">
+              <div
+                className={`h-full transition-[width] duration-75 ${level > 0.6 ? "bg-rose-500" : level > 0.15 ? "bg-emerald-500" : "bg-amber-400"}`}
+                style={{ width: `${Math.round(level * 100)}%` }}
+              />
+            </div>
+            <span className="w-10 text-right text-slate-500">{Math.round(level * 100)}</span>
+          </div>
+          <div className="flex gap-3">
+            <span className="w-24 shrink-0 text-slate-500">hearing</span>
+            <span className="min-h-5 flex-1 whitespace-pre-wrap text-slate-800">
+              {transcript || <span className="text-slate-400">(nothing yet — speak now)</span>}
+              {status === "listening" && interim && <span className="text-indigo-500"> {interim}</span>}
+            </span>
+          </div>
+          <div className="mt-2 flex gap-3">
+            <span className="w-24 shrink-0 text-slate-500">recognizer</span>
+            <span className="text-slate-800">
+              {status === "listening" ? "listening (Chrome Web Speech, en-US)" : status}
+              {micError && <span className="text-rose-600"> · error: {micError}</span>}
+            </span>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
