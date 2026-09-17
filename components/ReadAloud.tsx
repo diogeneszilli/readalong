@@ -60,6 +60,18 @@ export default function ReadAloud({ text, onDone, debug = false }: Props) {
       setStatus("unsupported");
       return;
     }
+    // "Go!" only once BOTH the recogniser and the audio recorder are capturing,
+    // plus a short buffer — otherwise the first word is spoken before either is live.
+    let recStarted = false;
+    let recorderReady = false;
+    const goIfReady = () => {
+      if (!recStarted || !recorderReady) return;
+      setTimeout(() => {
+        startedAt.current = Date.now();
+        setElapsed(0);
+        setStatus("listening");
+      }, 300);
+    };
     const rec = new ReadAloudRecognizer({
       onTranscript: (full, partial) => {
         setTranscript(full);
@@ -70,28 +82,32 @@ export default function ReadAloud({ text, onDone, debug = false }: Props) {
         else setMicError(code);
       },
       onStart: () => {
-        // Chrome only starts capturing a beat after start(); reading before
-        // this point loses the first word or two.
-        startedAt.current = Date.now();
-        setStatus("listening");
+        recStarted = true;
+        goIfReady();
       },
     });
     recRef.current = rec;
     setTranscript("");
     setInterim("");
     setMicError(null);
+    setAudioTranscript(null);
+    setScoreNote(null);
     startedAt.current = Date.now();
     setElapsed(0);
     setStatus("starting");
     rec.start();
-    setAudioTranscript(null);
-    setScoreNote(null);
     const recorder = new WavRecorder();
     recorderRef.current = recorder;
-    recorder.start().catch((e: unknown) => {
-      recorderRef.current = null;
-      setScoreNote(`recording unavailable (${e instanceof Error ? e.message : String(e)})`);
-    });
+    recorder
+      .start()
+      .catch((e: unknown) => {
+        recorderRef.current = null;
+        setScoreNote(`recording unavailable (${e instanceof Error ? e.message : String(e)})`);
+      })
+      .finally(() => {
+        recorderReady = true;
+        goIfReady();
+      });
     if (debug) {
       const meter = new MicLevelMeter(setLevel);
       meterRef.current = meter;
