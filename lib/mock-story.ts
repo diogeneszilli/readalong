@@ -38,6 +38,7 @@ export function mockPage(req: NextPageRequest): StoryPage {
     },
     choices: isFinal ? [] : [{ label: "Follow the map" }, { label: "Ask the frog for help" }],
     isEnding: isFinal,
+    scene: ({ 1: "clearing", 2: "log", 3: "stream", 4: "stream", 5: "stream", 6: "meadow" } as Record<number, string>)[req.level] ?? "clearing",
     illustrationPrompt: "A small red fox holding a paper map in a sunny forest.",
   };
 }

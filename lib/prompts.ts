@@ -1,5 +1,6 @@
 import { WORLDS, type NextPageRequest } from "./schema";
 import { levelSpec, placement } from "./leveling";
+import { sceneOptionsForPrompt } from "./scenes";
 
 export const SYSTEM_PROMPT = `You are a K–3 reading specialist and a children's picture-book author. You write one page at a time of an interactive branching story that a young child will READ ALOUD to practise oral reading fluency.
 
@@ -12,6 +13,7 @@ Rules for every page:
 - targetWords: 1–2 words that appear VERBATIM in this page's text, are slightly above the child's level, and are worth learning. Give a one-sentence definition a six-year-old understands.
 - question: one multiple-choice comprehension question about THIS page with exactly 3 options. Only one is correct. Wrong options must be plausible, not silly. Use "literal" for levels 1–3 and mix in "inferential" for levels 4–6.
 - choices: exactly 2 short, exciting choices for what happens next (start with a verb, ≤ 6 words). On the final page return an empty array and set isEnding to true with a satisfying, happy ending.
+- scene: pick exactly one scene id from the SCENES list for where this page mostly happens. Use the default scene when nothing else fits. Vary scenes across pages when the story moves.
 - illustrationPrompt: one sentence describing a bright, friendly picture-book illustration of this page. Never include text or letters in the image.
 - Never ask for or mention the child's name, age, location or any personal information.`;
 
@@ -50,6 +52,8 @@ export function buildUserPrompt(req: NextPageRequest): string {
 
   return `WORLD: ${world.name} — ${world.blurb}
 ${heroLine}
+SCENES (choose one id for "scene"):
+${sceneOptionsForPrompt(req.world)}
 
 READING LEVEL: ${spec.label} (${spec.grade})
 - About ${spec.words} words on this page (±20%).

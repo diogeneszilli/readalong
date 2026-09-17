@@ -62,6 +62,9 @@ export const StoryPageSchema = z.object({
     .max(2)
     .describe("Exactly 2 choices on non-final pages; empty array on the final page."),
   isEnding: z.boolean(),
+  scene: z
+    .string()
+    .describe("The id of the scene from the SCENES list that best matches where this page happens."),
   illustrationPrompt: z
     .string()
     .describe("One sentence describing a picture-book illustration of this page. No text in image."),

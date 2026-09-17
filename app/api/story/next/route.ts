@@ -10,6 +10,7 @@ import {
 } from "@/lib/llm";
 import { mockPage } from "@/lib/mock-story";
 import { getOpening } from "@/lib/openings";
+import { resolveScene } from "@/lib/scenes";
 
 export const maxDuration = 60;
 
@@ -81,6 +82,7 @@ export async function POST(request: Request) {
     const started = Date.now();
     try {
       const page = await generatePage(modelId, prompt);
+      page.scene = resolveScene(req.world, page.scene);
       return Response.json({ page, model: modelId, ms: Date.now() - started, failures });
     } catch (err) {
       const reason = noteFailure(modelId, describe(err));

@@ -28,7 +28,8 @@
         }
       ],
       "isEnding": false,
-      "illustrationPrompt": "A cute orange fox looking at a paper map resting on a wooden log in a sunny green forest."
+      "illustrationPrompt": "A cute orange fox looking at a paper map resting on a wooden log in a sunny green forest.",
+      "scene": "log"
     }
   ],
   "forest:2": [
@@ -60,7 +61,8 @@
         }
       ],
       "isEnding": false,
-      "illustrationPrompt": "A cute little fox standing on a big mossy rock in a green forest, looking down at a paper map."
+      "illustrationPrompt": "A cute little fox standing on a big mossy rock in a green forest, looking down at a paper map.",
+      "scene": "clearing"
     }
   ],
   "forest:4": [
@@ -92,7 +94,8 @@
         }
       ],
       "isEnding": false,
-      "illustrationPrompt": "A cute red fox holding a rolled paper stands in a sunny, magical green forest with a little blue bird on a branch."
+      "illustrationPrompt": "A cute red fox holding a rolled paper stands in a sunny, magical green forest with a little blue bird on a branch.",
+      "scene": "clearing"
     }
   ],
   "forest:5": [
@@ -128,7 +131,8 @@
         }
       ],
       "isEnding": false,
-      "illustrationPrompt": "A bright digital painting of a friendly red fox looking at a glowing paper bird in a sunlit forest."
+      "illustrationPrompt": "A bright digital painting of a friendly red fox looking at a glowing paper bird in a sunlit forest.",
+      "scene": "clearing"
     }
   ],
   "space:1": [
@@ -160,7 +164,8 @@
         }
       ],
       "isEnding": false,
-      "illustrationPrompt": "A cute little robot looks out the window of a red spaceship at a bright pink planet made of jelly."
+      "illustrationPrompt": "A cute little robot looks out the window of a red spaceship at a bright pink planet made of jelly.",
+      "scene": "ship"
     }
   ],
   "space:2": [
@@ -192,7 +197,8 @@
         }
       ],
       "isEnding": false,
-      "illustrationPrompt": "A cute little robot looks out a spaceship window at a giant, wobbling pink planet made of jelly."
+      "illustrationPrompt": "A cute little robot looks out a spaceship window at a giant, wobbling pink planet made of jelly.",
+      "scene": "crash"
     }
   ],
   "space:4": [
@@ -224,7 +230,8 @@
         }
       ],
       "isEnding": false,
-      "illustrationPrompt": "A cute little robot standing inside a spaceship looking out at a giant purple jelly planet."
+      "illustrationPrompt": "A cute little robot standing inside a spaceship looking out at a giant purple jelly planet.",
+      "scene": "crash"
     }
   ],
   "space:5": [
@@ -260,7 +267,8 @@
         }
       ],
       "isEnding": false,
-      "illustrationPrompt": "A cute little robot looks out a spaceship window at a giant, wobbling purple planet made of jelly in outer space."
+      "illustrationPrompt": "A cute little robot looks out a spaceship window at a giant, wobbling purple planet made of jelly in outer space.",
+      "scene": "crash"
     }
   ],
   "ocean:1": [
@@ -292,7 +300,8 @@
         }
       ],
       "isEnding": false,
-      "illustrationPrompt": "A cheerful little red crab looking at a large, rusted metal bell resting on the ocean floor among colorful coral."
+      "illustrationPrompt": "A cheerful little red crab looking at a large, rusted metal bell resting on the ocean floor among colorful coral.",
+      "scene": "bell"
     }
   ],
   "ocean:2": [
@@ -324,7 +333,8 @@
         }
       ],
       "isEnding": false,
-      "illustrationPrompt": "A little red crab looks at a shiny golden bell resting on the ocean floor near colorful coral reefs."
+      "illustrationPrompt": "A little red crab looks at a shiny golden bell resting on the ocean floor near colorful coral reefs.",
+      "scene": "bell"
     }
   ],
   "ocean:4": [
@@ -360,7 +370,8 @@
         }
       ],
       "isEnding": false,
-      "illustrationPrompt": "A small, cheerful orange crab holding a piece of paper walks along a colorful, sunny coral reef."
+      "illustrationPrompt": "A small, cheerful orange crab holding a piece of paper walks along a colorful, sunny coral reef.",
+      "scene": "bell"
     }
   ]
 }

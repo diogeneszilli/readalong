@@ -8,6 +8,7 @@ import QuestionCard from "@/components/QuestionCard";
 import VocabCard from "@/components/VocabCard";
 import ChoiceButtons from "@/components/ChoiceButtons";
 import ProgressDots from "@/components/ProgressDots";
+import SceneArt from "@/components/SceneArt";
 import { WORLDS, type StoryPage } from "@/lib/schema";
 import { nextLevel } from "@/lib/leveling";
 import { getSession, saveSession, type PageRecord, type Session } from "@/lib/storage";
@@ -232,7 +233,9 @@ export default function StoryGame({ sessionId }: { sessionId: string }) {
       )}
 
       {current && phase === "reading" && (
-        <div className="flex flex-col gap-6 rounded-3xl bg-white p-8 shadow">
+        <div className="flex flex-col gap-6 overflow-hidden rounded-3xl bg-white shadow">
+          <SceneArt world={session.world} scene={current.page.scene} className="aspect-[5/2]" />
+          <div className="flex flex-col gap-6 px-8 pb-8">
           <ProgressDots page={current.pageNumber} total={session.totalPages} level={current.level} />
           <h2 className="text-2xl font-extrabold text-indigo-700">{current.page.title}</h2>
           <p className="text-slate-500">
@@ -247,6 +250,7 @@ export default function StoryGame({ sessionId }: { sessionId: string }) {
             </p>
           )}
           <ReadAloud key={`${current.pageNumber}-${attempt}`} text={current.page.text} onDone={onReadDone} />
+          </div>
         </div>
       )}
 
@@ -279,7 +283,8 @@ export default function StoryGame({ sessionId }: { sessionId: string }) {
       )}
 
       {phase === "ending" && (
-        <div className="animate-pop flex flex-col items-center gap-5 rounded-3xl bg-white p-10 text-center shadow">
+        <div className="animate-pop flex flex-col items-center gap-5 overflow-hidden rounded-3xl bg-white pb-10 text-center shadow">
+          <SceneArt world={session.world} scene={current?.page.scene} className="aspect-[5/2]" />
           <div className="text-7xl">🏆</div>
           <h2 className="text-3xl font-extrabold">The End!</h2>
           <p className="text-lg text-slate-600">

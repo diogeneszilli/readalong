@@ -6,6 +6,7 @@ import Link from "next/link";
 import { WORLDS, type Level, type WorldId } from "@/lib/schema";
 import { LEVELS } from "@/lib/leveling";
 import { createSession, listSessions, type Session } from "@/lib/storage";
+import SceneArt from "@/components/SceneArt";
 
 const GRADES: { label: string; level: Level }[] = [
   { label: "Kindergarten", level: 1 },
@@ -51,13 +52,17 @@ export default function Home() {
               type="button"
               onClick={() => setWorld(w.id)}
               className={[
-                "rounded-3xl border-4 bg-white p-5 text-left shadow-sm transition hover:-translate-y-0.5",
+                "overflow-hidden rounded-3xl border-4 bg-white text-left shadow-sm transition hover:-translate-y-0.5",
                 world === w.id ? "border-indigo-500" : "border-transparent",
               ].join(" ")}
             >
-              <div className="text-5xl">{w.emoji}</div>
-              <div className="mt-2 text-xl font-extrabold">{w.name}</div>
-              <div className="mt-1 text-sm text-slate-500">{w.blurb}</div>
+              <SceneArt world={w.id} className="aspect-[2/1]" />
+              <div className="p-4">
+                <div className="text-xl font-extrabold">
+                  {w.emoji} {w.name}
+                </div>
+                <div className="mt-1 text-sm text-slate-500">{w.blurb}</div>
+              </div>
             </button>
           ))}
         </div>
