@@ -1,6 +1,7 @@
 # Demo video — shot list (target 2:45, hard cap 3:00)
 
 Record in Chrome at 1280×800 or larger, mic allowed, on https://readalong-ten.vercel.app.
+**Use the Mac's built-in microphone, not AirPods** — Bluetooth mics drop to phone-quality audio.
 Screen recording + your voice only (terms: nobody else on camera or audio). QuickTime or Loom.
 Do one dry run first so the story you record is a good one.
 

@@ -8,7 +8,9 @@ shows fluency against grade-level norms and which words to practise.
 Built solo for the [Nerdy AI Hackathon Challenge](https://hackathon.nerdy.com) (Prompt 03:
 English Reading Game), September 2026.
 
-**Live:** https://readalong-ten.vercel.app · works best in Google Chrome (needs the microphone).
+**Live:** https://readalong-ten.vercel.app · works best in Google Chrome with the computer's built-in
+microphone or a wired headset. Bluetooth headsets switch to 8 kHz hands-free audio when their mic is
+in use, and recognition degrades badly.
 
 ## Why this exists
 

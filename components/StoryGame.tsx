@@ -242,6 +242,7 @@ export default function StoryGame({ sessionId }: { sessionId: string }) {
           <h2 className="text-2xl font-extrabold text-indigo-700">{current.page.title}</h2>
           <p className="text-slate-500">
             Read this page out loud. Tap any word to hear it.{" "}
+            <span className="text-slate-400">Use the computer&apos;s own microphone or a wired headset; Bluetooth headsets sound like a phone call and get misheard.</span>{" "}
             <button type="button" onClick={() => speak(current.page.text, 0.8)} className="font-bold text-indigo-600">
               🔊 Read it to me first
             </button>
