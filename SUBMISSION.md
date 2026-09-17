@@ -59,7 +59,7 @@ repo README, docs/PRD.md and DISCLOSURES.md.
 
 ## Anything else (optional upload)
 
-- Screenshot of the report page.
+- Screenshot of the report page: `docs/screenshots/report.png` (also `reading.png`, `scenes.png`).
 - Optionally the 30-second "how it's built" architecture slide from the video.
 
 ## Pre-submit checklist

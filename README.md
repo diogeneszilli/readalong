@@ -13,6 +13,11 @@ the computer's built-in mic or a wired headset scores most accurately (Bluetooth
 phone-quality audio for their mic, which the app compensates for with volume normalisation and
 phrase hints, and flags with a banner).
 
+<p align="center">
+  <img src="docs/screenshots/reading.png" width="48%" alt="Reading a page with live word highlighting" />
+  <img src="docs/screenshots/report.png" width="48%" alt="Parent/tutor report" />
+</p>
+
 ## Why this exists
 
 Oral reading fluency is the strongest single predictor of reading comprehension in the early
