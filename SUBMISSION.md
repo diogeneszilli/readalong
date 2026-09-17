@@ -70,7 +70,8 @@ disclosures are in the repo README, docs/PRD.md and DISCLOSURES.md.
 
 1. Field-test with real K–3 readers and their tutors, and calibrate the level thresholds against a
    human-scored reading inventory.
-2. Progress across sessions and devices, so a tutor can see a child's WCPM trend over weeks.
+2. Progress across sessions and devices with Supabase, so a tutor can see a child's WCPM trend
+   over weeks.
 3. Per-moment illustrations and expressive read-back, once off the free tier.
 4. Session intelligence for the tutor: which phonics patterns a child keeps missing, turned into
    the next story's constraints.
