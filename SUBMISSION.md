@@ -19,43 +19,48 @@ Target: submit by 6 PM CT. Flip the GitHub repo to public first.
 
 **Live demo:** https://readalong-ten.vercel.app (Chrome, allow the microphone)
 
-## What did you build?
+## What did you build? (form prompt: what it does, how you built it, what you'd do next)
+
+**What it does**
 
 Readalong is a read-aloud story game for K–3 readers that acts as the patient listener most kids
-never get enough of.
+never get enough of. The child picks a world and a starting grade. Gemini writes a branching story
+one page at a time, constrained to one of six reading levels (word count, sentence length, phonics
+patterns, sight words). The child reads each page out loud. Words light up as they're recognized,
+and when the child taps "I'm done" the recorded clip is transcribed and scored word by word:
+accuracy, words-correct-per-minute, and the exact words missed, each tap-to-hear.
 
-The child picks a world and a starting grade. Gemini writes a branching story one page at a time,
-constrained to one of six reading levels (word count, sentence length, phonics patterns, sight
-words). The child reads each page out loud; the browser's speech recognition produces a
-transcript, and a word-alignment algorithm scores every word as correct, close, or missed, lighting
-them up live and computing accuracy and words-correct-per-minute (WCPM). Nothing leaves the device:
-audio, transcripts and results all stay in the browser.
+After every page the app applies the same rule schools use in reading inventories: 95%+ accuracy is
+independent level and the next page steps up, 90–94% holds, below 90% steps down. Then one
+comprehension question, one or two vocabulary words with kid-sized definitions, and a choice of what
+happens next. "Read it again" turns any page into repeated-reading practice and shows the fluency
+gain. At the end, a parent/tutor report shows WCPM against Hasbrouck–Tindal grade norms, the level
+path the story took, comprehension results, and a practice list. Every page is illustrated from
+hand-drawn scenes the model tags per page.
 
-After each page the app applies the Betts informal-reading-inventory rule schools have used for
-decades: ≥95% accuracy means the text is independent-level and the next page steps up, 90–94% holds,
-below 90% steps down. The child then answers one comprehension question (literal at lower levels,
-inferential higher up), learns one or two vocabulary words from the page with tap-to-hear
-pronunciation, and chooses what happens next. A "read it again" button turns any page into
-repeated-reading practice and shows the WCPM gain.
+**How I built it**
 
-At the end, a parent/tutor report shows fluency per page against Hasbrouck–Tindal grade-level norms,
-the level path the story took, comprehension results, and a tap-to-hear list of words to practise.
+Next.js 16 and TypeScript on Vercel, with the Vercel AI SDK and Gemini via a Google AI Studio key on
+the free tier. Each page is a single structured-output call validated with Zod. Because the free
+tier allows 20 requests per model per day, the story API rotates across five Gemini models with
+per-model cooldowns and serves pre-generated opening pages, so a story costs four live calls.
 
-Why it matters: oral reading fluency is the strongest early predictor of comprehension, and it is
-built by reading aloud at the right level with someone listening. Readalong makes that daily
-practice possible without an adult having to sit through it, and gives the adult a specialist-grade
-picture of how it went.
+Scoring uses two transcripts. The browser's Web Speech API gives live word highlighting, but on my
+own test reads it scored a clean read at 58–67%. So the read is also recorded as a 16 kHz WAV and
+transcribed verbatim by Gemini, with the page's vocabulary as unordered phrase hints, which I
+verified keeps deliberate misreads as spoken. Words are aligned with a longest-common-subsequence
+algorithm plus spelling and sound-alike tolerance. The audio path scores the same reads at 96–100%,
+on a built-in mic and on AirPods. Sessions stay in localStorage; no accounts, no analytics. Built
+solo in three days with Claude Code as a coding assistant; all disclosures are in the repo.
 
-Scoring is done from the recorded audio: the browser's speech recognition highlights words live for
-immediate feedback, and when the child finishes, the clip is transcribed verbatim by Gemini and
-aligned word by word with spelling and sound-alike tolerance. On my own test reads, browser
-recognition alone scored 58–67%; the audio path scores 96–100%, on a built-in mic and on AirPods.
-Every page is illustrated from a pool of hand-drawn SVG scenes the model tags per page.
+**What I'd do next**
 
-Built solo in three days with Next.js, the Vercel AI SDK and Gemini, deployed on Vercel. The story
-API rotates across several Gemini models with per-model cooldowns and serves pre-generated opening
-pages, so it runs entirely on the free tier. Full details, pedagogy notes and disclosures are in the
-repo README, docs/PRD.md and DISCLOSURES.md.
+1. Field-test with real K–3 readers and their tutors, and calibrate the level thresholds against a
+   human-scored reading inventory.
+2. Progress across sessions and devices, so a tutor can see a child's WCPM trend over weeks.
+3. Per-moment illustrations and expressive read-back, once off the free tier.
+4. Session intelligence for the tutor: which phonics patterns a child keeps missing, turned into
+   the next story's constraints.
 
 ## Anything else (optional upload)
 
