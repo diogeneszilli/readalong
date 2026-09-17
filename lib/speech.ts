@@ -33,6 +33,7 @@ interface SpeechRecognitionLike extends EventTarget {
   onresult: ((e: SREvent) => void) | null;
   onerror: ((e: SRErrorEvent) => void) | null;
   onend: (() => void) | null;
+  onstart: (() => void) | null;
 }
 type SRConstructor = new () => SpeechRecognitionLike;
 
@@ -53,6 +54,8 @@ export interface ReadAloudListener {
   /** Full transcript so far: committed text + current interim guess. */
   onTranscript(full: string, interim: string): void;
   onError?(code: string): void;
+  /** Fired when the recogniser is actually capturing audio (first session only). */
+  onStart?(): void;
 }
 
 export class ReadAloudRecognizer {
@@ -60,6 +63,7 @@ export class ReadAloudRecognizer {
   private committed = "";
   private interim = "";
   private listening = false;
+  private started = false;
 
   constructor(private listener: ReadAloudListener) {}
 
@@ -80,6 +84,7 @@ export class ReadAloudRecognizer {
     this.committed = "";
     this.interim = "";
     this.listening = true;
+    this.started = false;
     this.spawn(Ctor);
   }
 
@@ -89,6 +94,13 @@ export class ReadAloudRecognizer {
     rec.continuous = true;
     rec.interimResults = true;
     rec.maxAlternatives = 1;
+
+    rec.onstart = () => {
+      if (!this.started) {
+        this.started = true;
+        this.listener.onStart?.();
+      }
+    };
 
     rec.onresult = (e) => {
       let interim = "";

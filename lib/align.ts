@@ -7,6 +7,8 @@
  * the scoring drifting off by one after the first mistake.
  */
 
+import { soundsAlike } from "./phonetic";
+
 export type WordStatus = "ok" | "close" | "missed";
 
 export interface AlignedWord {
@@ -67,8 +69,10 @@ function levenshtein(a: string, b: string): number {
 }
 
 /**
- * "close" tolerates recogniser noise (plurals, -ed, homophones) without
- * excusing real misreads: 1 edit for words of 4+ letters, 2 edits for 7+.
+ * "close" tolerates recogniser noise without excusing real misreads:
+ *  - spelling: 1 edit for words of 4+ letters, 2 edits for 7+ (plurals, -ed)
+ *  - sound: identical phonetic key (hat/head, sam/some, there/their), because
+ *    the recogniser substitutes sound-alikes far more often than a child does.
  */
 export function wordMatch(expected: string, heard: string): WordStatus {
   if (expected === heard) return "ok";
@@ -76,6 +80,7 @@ export function wordMatch(expected: string, heard: string): WordStatus {
   const d = levenshtein(expected, heard);
   if (len >= 7 && d <= 2) return "close";
   if (len >= 4 && d <= 1) return "close";
+  if (soundsAlike(expected, heard)) return "close";
   return "missed";
 }
 

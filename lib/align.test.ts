@@ -76,3 +76,19 @@ describe("wcpm", () => {
     expect(wcpm(10, 0)).toBe(600);
   });
 });
+
+describe("sound-alike matching", () => {
+  it("forgives recogniser homophones and near-homophones", () => {
+    expect(wordMatch("hat", "head")).toBe("close");
+    expect(wordMatch("sam", "some")).toBe("close");
+    expect(wordMatch("there", "their")).toBe("close");
+    expect(wordMatch("red", "read")).toBe("close");
+  });
+  it("still catches real misreads", () => {
+    expect(wordMatch("cat", "dog")).toBe("missed");
+    expect(wordMatch("big", "pig")).toBe("missed");
+  });
+  it("forgives vowel-only differences (recogniser noise outweighs decoding errors here)", () => {
+    expect(wordMatch("run", "ran")).toBe("close");
+  });
+});

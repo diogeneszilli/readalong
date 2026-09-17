@@ -19,7 +19,7 @@ interface Props {
   debug?: boolean;
 }
 
-type Status = "idle" | "listening" | "typing" | "done" | "unsupported" | "denied";
+type Status = "idle" | "starting" | "listening" | "typing" | "done" | "unsupported" | "denied";
 
 export default function ReadAloud({ text, onDone, debug = false }: Props) {
   const [status, setStatus] = useState<Status>("idle");
@@ -58,6 +58,12 @@ export default function ReadAloud({ text, onDone, debug = false }: Props) {
         if (code === "not-allowed" || code === "service-not-allowed") setStatus("denied");
         else setMicError(code);
       },
+      onStart: () => {
+        // Chrome only starts capturing a beat after start(); reading before
+        // this point loses the first word or two.
+        startedAt.current = Date.now();
+        setStatus("listening");
+      },
     });
     recRef.current = rec;
     setTranscript("");
@@ -65,7 +71,7 @@ export default function ReadAloud({ text, onDone, debug = false }: Props) {
     setMicError(null);
     startedAt.current = Date.now();
     setElapsed(0);
-    setStatus("listening");
+    setStatus("starting");
     rec.start();
     if (debug) {
       const meter = new MicLevelMeter(setLevel);
@@ -112,7 +118,13 @@ export default function ReadAloud({ text, onDone, debug = false }: Props) {
 
   return (
     <div className="flex flex-col gap-6">
-      <p className="text-3xl leading-relaxed font-medium tracking-wide" aria-live="polite">
+      {status === "listening" && elapsed < 1500 && (
+        <div className="animate-pop text-2xl font-extrabold text-emerald-600">🟢 Go! Read out loud.</div>
+      )}
+      <p
+        className={`text-3xl leading-relaxed font-medium tracking-wide transition-opacity ${status === "starting" ? "opacity-40" : ""}`}
+        aria-live="polite"
+      >
         {alignment.words.map((w, i) => (
           <span key={i}>
             <button
@@ -179,6 +191,12 @@ export default function ReadAloud({ text, onDone, debug = false }: Props) {
             no microphone? type it
           </button>
         )}
+        {status === "starting" && (
+          <span className="flex items-center gap-2 text-xl font-bold text-amber-600">
+            <span className="inline-block h-3 w-3 animate-pulse rounded-full bg-amber-400" />
+            Get ready…
+          </span>
+        )}
         {(status === "listening" || status === "typing") && (
           <>
             <button
@@ -201,7 +219,7 @@ export default function ReadAloud({ text, onDone, debug = false }: Props) {
         )}
       </div>
 
-      {debug && status !== "idle" && status !== "typing" && (
+      {debug && status !== "idle" && status !== "typing" && status !== "unsupported" && (
         <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4 font-mono text-sm" data-testid="mic-debug">
           <div className="mb-2 flex items-center gap-3">
             <span className="w-24 shrink-0 text-slate-500">mic level</span>
@@ -223,7 +241,7 @@ export default function ReadAloud({ text, onDone, debug = false }: Props) {
           <div className="mt-2 flex gap-3">
             <span className="w-24 shrink-0 text-slate-500">recognizer</span>
             <span className="text-slate-800">
-              {status === "listening" ? "listening (Chrome Web Speech, en-US)" : status}
+              {status === "listening" ? "listening (Chrome Web Speech, en-US)" : status === "starting" ? "starting up…" : status}
               {micError && <span className="text-rose-600"> · error: {micError}</span>}
             </span>
           </div>
