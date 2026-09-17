@@ -46,10 +46,16 @@ built by reading aloud at the right level with someone listening. Readalong make
 practice possible without an adult having to sit through it, and gives the adult a specialist-grade
 picture of how it went.
 
+Scoring is done from the recorded audio: the browser's speech recognition highlights words live for
+immediate feedback, and when the child finishes, the clip is transcribed verbatim by Gemini and
+aligned word by word with spelling and sound-alike tolerance. On my own test reads, browser
+recognition alone scored 58–67%; the audio path scores 96–100%, on a built-in mic and on AirPods.
+Every page is illustrated from a pool of hand-drawn SVG scenes the model tags per page.
+
 Built solo in three days with Next.js, the Vercel AI SDK and Gemini, deployed on Vercel. The story
 API rotates across several Gemini models with per-model cooldowns and serves pre-generated opening
 pages, so it runs entirely on the free tier. Full details, pedagogy notes and disclosures are in the
-repo README and DISCLOSURES.md.
+repo README, docs/PRD.md and DISCLOSURES.md.
 
 ## Anything else (optional upload)
 
@@ -59,8 +65,8 @@ repo README and DISCLOSURES.md.
 ## Pre-submit checklist
 
 - [ ] Video ≤ 3:00, only me on camera/voice, no other identifiable people
-- [ ] Repo public, README + DISCLOSURES.md + LICENSE present
-- [ ] `npx license-checker --failOn "GPL;LGPL;AGPL;SSPL"` passes
-- [ ] Live URL smoke-tested in a fresh Chrome profile (mic prompt, full story, report)
+- [x] Repo public, README + DISCLOSURES.md + LICENSE present (2026-09-17)
+- [x] License scan reviewed 2026-09-17: only copyleft entry is Next.js's optional sharp/libvips, unused and documented in DISCLOSURES.md
+- [x] Live URL: automated full-story walkthrough passed on production 2026-09-17 (real model pages, typed fallback). Manual mic run-through: pending (Diógenes)
 - [ ] LinkedIn Nerdy end date updated to May 2026
-- [ ] Vercel env has GOOGLE_GENERATIVE_AI_API_KEY; `.env` model chain committed
+- [x] Vercel env has GOOGLE_GENERATIVE_AI_API_KEY (unused OpenRouter key removed); `.env` model chain committed

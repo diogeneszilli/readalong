@@ -9,7 +9,7 @@ const OUT = process.env.SHOTS_DIR ?? "./.shots";
 mkdirSync(OUT, { recursive: true });
 const EXE = process.env.CHROME_PATH ??
   "/Users/diogeneszilli/Library/Caches/ms-playwright/chromium_headless_shell-1234/chrome-headless-shell-mac-arm64/chrome-headless-shell";
-const BASE = "http://localhost:3000";
+const BASE = process.env.BASE_URL ?? "http://localhost:3000";
 const mobile = process.argv.includes("--mobile");
 const tag = mobile ? "m" : "d";
 
