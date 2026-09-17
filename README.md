@@ -8,9 +8,10 @@ shows fluency against grade-level norms and which words to practise.
 Built solo for the [Nerdy AI Hackathon Challenge](https://hackathon.nerdy.com) (Prompt 03:
 English Reading Game), September 2026.
 
-**Live:** https://readalong-ten.vercel.app · works best in Google Chrome with the computer's built-in
-microphone or a wired headset. Bluetooth headsets switch to 8 kHz hands-free audio when their mic is
-in use, and recognition degrades badly.
+**Live:** https://readalong-ten.vercel.app · works best in Google Chrome. Any microphone works;
+the computer's built-in mic or a wired headset scores most accurately (Bluetooth headsets use
+phone-quality audio for their mic, which the app compensates for with volume normalisation and
+phrase hints, and flags with a banner).
 
 ## Why this exists
 
@@ -70,7 +71,10 @@ Result → Question → Vocab → Choice → next page (level adjusted) … → 
   from `data/openings.json`. A story costs four live requests.
 - **Speech scoring** uses two transcripts. The browser's Web Speech API gives instant word
   highlighting while the child reads. When they finish, the recorded audio goes to Gemini for an
-  accurate verbatim transcript (browser recognition alone scored a clean adult read at 58–67%).
+  accurate verbatim transcript (browser recognition alone scored a clean adult read at 58–67%;
+  the audio path scores the same reads at 96–100%, including on a Bluetooth headset). The
+  transcriber gets the passage's vocabulary as unordered phrase hints, the way production
+  speech APIs do, and was verified to keep deliberate misreads as spoken.
   Alignment is a longest-common-subsequence DP with spelling *and* sound-alike matching, so
   skipped, inserted and substituted words score correctly and recognizer homophones (hat/head)
   aren't counted against the child.

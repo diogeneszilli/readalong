@@ -276,8 +276,8 @@ export default function ReadAloud({ text, onDone, debug = false }: Props) {
       {micInfo?.narrowband && status !== "done" && (
         <p className="rounded-xl bg-amber-50 px-4 py-3 text-sm text-amber-900">
           🎧 <span className="font-bold">{micInfo.bluetooth ? "Bluetooth headset detected." : "Low-quality microphone detected."}</span>{" "}
-          Headset mics switch to phone-call quality, so words get misheard. For fair scores, use the
-          computer&apos;s own microphone or a wired headset.
+          It works, but headset mics use phone-call quality, so a word may occasionally be misheard.
+          The computer&apos;s own microphone or a wired headset is the most accurate.
         </p>
       )}
       {status === "denied" && (

@@ -92,9 +92,12 @@ leaves the device except story text.
   ("Get ready… / Go!"), so the first words are not lost.
 - FR-8b The read is recorded (16 kHz mono WAV). On "I'm done" the clip is transcribed server-side by
   Gemini (verbatim, lowercase, no corrections, hero names as hints) and that transcript is the one
-  scored. If transcription is unavailable, the browser transcript is used. Rationale: browser
-  recognition scored a clean adult read at 58–67%; Gemini transcribed a synthetic clip
-  word-perfectly.
+  scored. The passage's vocabulary is sent as unordered phrase hints (verified not to mask
+  deliberate misreads). Clips are volume-normalised; effectively silent clips are not transcribed.
+  If transcription is unavailable, the browser transcript is used. Measured: browser recognition
+  58–67% on clean adult reads; audio path 96–100% on the same reads, built-in mic and Bluetooth.
+- FR-8c One microphone stream is opened and shared by the recorder and level meter. A Bluetooth or
+  narrowband input is detected and flagged with a non-blocking banner.
 - FR-9 Words are aligned to the transcript with a longest-common-subsequence algorithm, spelling
   tolerance (1 edit on 4+ letters, 2 on 7+) and sound-alike tolerance (identical phonetic key, e.g.
   hat/head, there/their), producing per-word ok / close / missed.
