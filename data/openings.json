@@ -373,5 +373,38 @@
       "illustrationPrompt": "A small, cheerful orange crab holding a piece of paper walks along a colorful, sunny coral reef.",
       "scene": "bell"
     }
+  ],
+  "ocean:5": [
+    {
+      "title": "Sam and the Sunken Bell",
+      "text": "Sam the crab scuttled across the bright coral reef, looking for a grand adventure in the warm, shallow water. Suddenly, a strange sound echoed from the deep sand below. Clang, clang went a heavy metal chime. Sam peeked over a tall ridge and gasped. A massive, ancient brass bell rested on the ocean floor, half buried in white sand. Golden bubbles floated lazily around the rim. Sam wondered what secret treasure might be hiding inside the heavy metal dome.",
+      "targetWords": [
+        {
+          "word": "ancient",
+          "kidDefinition": "Something ancient is very, very old."
+        }
+      ],
+      "question": {
+        "kind": "literal",
+        "prompt": "What did Sam find resting on the ocean floor?",
+        "options": [
+          "A massive brass bell",
+          "A shiny treasure chest",
+          "A sleeping giant squid"
+        ],
+        "answerIndex": 0
+      },
+      "choices": [
+        {
+          "label": "Climb up to ring the bell"
+        },
+        {
+          "label": "Dig in the sand for clues"
+        }
+      ],
+      "isEnding": false,
+      "scene": "reef",
+      "illustrationPrompt": "A small red crab with big eyes looks down at a huge, old brass bell half buried in white coral sand."
+    }
   ]
 }
