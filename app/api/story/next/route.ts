@@ -15,7 +15,7 @@ import { resolveScene } from "@/lib/scenes";
 export const maxDuration = 60;
 
 /** Per-model timeout so a stalled endpoint falls through to the next model. */
-const MODEL_TIMEOUT_MS = 20_000;
+const MODEL_TIMEOUT_MS = 12_000;
 
 async function generatePage(modelId: string, prompt: string): Promise<StoryPage> {
   const { output } = await generateText({

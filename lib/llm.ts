@@ -13,12 +13,14 @@ import { createGoogleGenerativeAI } from "@ai-sdk/google";
  *   STORY_API_KEY_NAME – name of the env var that holds the secret key
  * The secret itself lives in `.env.local` (git-ignored) under that name.
  */
+// Flash-Lite first: on the free tier it answers in ~2 s while the Flash models
+// often sit on "high demand"; prose quality at K–3 levels is comparable.
 const FALLBACK_MODELS = [
+  "gemini-3.5-flash-lite",
+  "gemini-3.1-flash-lite",
   "gemini-3.6-flash",
   "gemini-3.7-flash",
   "gemini-3.8-flash",
-  "gemini-3.5-flash-lite",
-  "gemini-3.1-flash-lite",
 ];
 const FALLBACK_KEY_NAME = "GOOGLE_GENERATIVE_AI_API_KEY";
 
