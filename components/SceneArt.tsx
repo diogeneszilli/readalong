@@ -89,8 +89,15 @@ const Tree = ({ x, y = 236, s = 1, dark = false }: { x: number; y?: number; s?: 
 const Flower = ({ x, y = 252, c = "#ff6f91" }: { x: number; y?: number; c?: string }) => (
   <g transform={`translate(${x} ${y})`}>
     <rect x={-1.5} y={0} width={3} height={18} fill="#3c9159" />
-    {[0, 72, 144, 216, 288].map((a) => (
-      <circle key={a} cx={Math.cos((a * Math.PI) / 180) * 6} cy={Math.sin((a * Math.PI) / 180) * 6} r={5} fill={c} />
+    {/* fixed coordinates: Math.cos/sin round differently on server vs browser and break hydration */}
+    {[
+      [6, 0],
+      [1.85, 5.71],
+      [-4.85, 3.53],
+      [-4.85, -3.53],
+      [1.85, -5.71],
+    ].map(([px, py]) => (
+      <circle key={`${px},${py}`} cx={px} cy={py} r={5} fill={c} />
     ))}
     <circle r={3.5} fill="#ffd23f" />
   </g>
